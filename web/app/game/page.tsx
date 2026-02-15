@@ -27,7 +27,7 @@ export default function GamePage() {
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold">WIP</h1>
+      <h1 className="text-2xl font-bold">LANCEMENT DE LA GAME</h1>
       <p className="text-sm opacity-80 mt-2">Game en cours</p>
 
       <div className="mt-6 rounded-lg border p-4">
