@@ -29,7 +29,7 @@ export default function TeamsPage() {
   const { team1, team2, validated, source } = state.teams;
 
   function validate() {
-    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase(); // TODO: remplacer par un vrai code généré par le backend
 
     update({
       ...state,

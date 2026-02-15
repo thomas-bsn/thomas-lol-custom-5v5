@@ -35,6 +35,7 @@ export default function DraftPage() {
     if (!state.draft) {
       update({
         ...state,
+        version: 1,
         mode: "draft",
         draft: createDraftState(state.players),
         teams: undefined,
@@ -77,36 +78,26 @@ export default function DraftPage() {
   if (currentTurn === 2) turnLabel = captain2 ? `Au tour de Team 2 (${captain2})` : "Au tour de Team 2";
 
   function setCaptain(team: 1 | 2, value: string) {
+    if (!state) return;
+
     const v = value === "" ? undefined : value;
 
-    if (team === 1) {
-      update({
-        ...state,
-        mode: "draft",
-        draft: {
-          ...draft,
-          phase: "captains",
-          captain1: v,
-          captain2: draft.captain2 === v ? undefined : draft.captain2,
-          firstPicker: undefined,
-          available: [...players],
-          team1: [],
-          team2: [],
-          pickIndex: 0,
-        },
-        teams: undefined,
-      });
-      setCoinFlipResult(null);
-      return;
-    }
+    const nextCaptain1 = team === 1 ? v : captain1;
+    const nextCaptain2 = team === 2 ? v : captain2;
+
+    // empêche les doublons
+    const c1 = nextCaptain1;
+    const c2 = c1 && nextCaptain2 === c1 ? undefined : nextCaptain2;
 
     update({
       ...state,
+      version: 1,
       mode: "draft",
       draft: {
         ...draft,
         phase: "captains",
-        captain2: v,
+        captain1: c1,
+        captain2: c2,
         firstPicker: undefined,
         available: [...players],
         team1: [],
@@ -115,10 +106,12 @@ export default function DraftPage() {
       },
       teams: undefined,
     });
+
     setCoinFlipResult(null);
   }
 
   function flipCoinAndStart() {
+    if (!state) return;
     if (!captain1 || !captain2) return;
 
     const fp: 1 | 2 = Math.random() < 0.5 ? 1 : 2;
@@ -128,6 +121,7 @@ export default function DraftPage() {
 
     update({
       ...state,
+      version: 1,
       mode: "draft",
       draft: {
         phase: "picking",
@@ -144,6 +138,7 @@ export default function DraftPage() {
   }
 
   function pickPlayer(p: string) {
+    if (!state) return;
     if (!firstPicker) return;
     if (isDone) return;
     if (!available.includes(p)) return;
@@ -159,6 +154,7 @@ export default function DraftPage() {
 
     update({
       ...state,
+      version: 1,
       mode: "draft",
       draft: {
         ...draft,
@@ -177,12 +173,16 @@ export default function DraftPage() {
   }
 
   function resetDraft() {
+    if (!state) return;
+
     update({
       ...state,
+      version: 1,
       mode: "draft",
       draft: createDraftState(players),
       teams: undefined,
     });
+
     setCoinFlipResult(null);
   }
 
