@@ -22,7 +22,7 @@ export default function GamePage() {
 
   return (
     <main className="p-6 max-w-3xl mx-auto text-center">
-      <h1 className="text-3xl font-bold">CODE</h1>
+      <h1 className="text-3xl font-bold">CODE (WIP... le code est faux)</h1>
 
       <div className="mt-6 rounded-xl border p-8">
         <div className="text-6xl font-extrabold tracking-widest">
