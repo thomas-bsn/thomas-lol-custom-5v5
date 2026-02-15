@@ -29,18 +29,23 @@ export default function TeamsPage() {
   const { team1, team2, validated, source } = state.teams;
 
   function validate() {
-    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase(); // TODO: remplacer par un vrai code généré par le backend
+  if (!state) return;           // <- important
+  if (!state.teams) return;     // <- safety
 
-    update({
-      ...state,
-      teams: { ...state.teams!, validated: true },
-      game: { status: "running", code: fakeCode },
-    });
+  const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
 
-    router.push("/game");
-  }
+  update({
+    ...state,
+    version: 1,                 // <- force le literal obligatoire
+    teams: { ...state.teams, validated: true },
+    game: { status: "running", code: fakeCode },
+  });
+
+  router.push("/game");
+}
 
   function backAndReset() {
+    if (!state) return;
     // on garde le mode d'origine pour revenir au bon écran
     update(createInitialState(state.players));
     router.push(source === "draft" ? "/draft" : "/roulette");
