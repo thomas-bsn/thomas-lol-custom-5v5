@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ClientBootReset from "./ClientBootReset";
+import HelpTournamentButton from "./HelpTournamentButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +27,8 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
+        <ClientBootReset />
+        <HelpTournamentButton />
         {/* Background vidéo */}
         <div className="video-bg">
           <video

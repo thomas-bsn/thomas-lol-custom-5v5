@@ -11,35 +11,32 @@ export default function GamePage() {
   useEffect(() => {
     if (!hydrated) return;
 
-    // si pas de teams validées, retourne
-    if (!state?.teams?.validated) {
-      router.replace("/teams");
-      return;
+    // si pas de game, retour au début
+    if (!state?.game?.code) {
+      router.replace("/setup");
     }
-
-    // si pas de game, on reste quand même (mais c'est censé être set au validate)
   }, [hydrated, state, router]);
 
   if (!hydrated) return <main className="p-6">Chargement…</main>;
-  if (!state?.teams?.validated) return <main className="p-6">Redirection…</main>;
-
-  const code = state.game?.code;
+  if (!state?.game?.code) return <main className="p-6">Redirection…</main>;
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold">LANCEMENT DE LA GAME</h1>
-      <p className="text-sm opacity-80 mt-2">Game en cours</p>
+    <main className="p-6 max-w-3xl mx-auto text-center">
+      <h1 className="text-3xl font-bold">CODE</h1>
 
-      <div className="mt-6 rounded-lg border p-4">
-        <div className="text-sm opacity-70">Code de game</div>
-        <div className="text-xl font-semibold mt-2">
-          {code ? code : "En attente du backend…"}
+      <div className="mt-6 rounded-xl border p-8">
+        <div className="text-6xl font-extrabold tracking-widest">
+          {state.game.code}
         </div>
+        <div className="mt-4 text-sm opacity-80">À utiliser pour rejoindre la game</div>
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <button className="rounded-lg border px-4 py-2" onClick={() => router.push("/teams")}>
-          Retour teams
+      <div className="mt-6">
+        <button
+          className="rounded-lg border px-4 py-2"
+          onClick={() => router.push("/tuto")}
+        >
+          Comment rejoindre un tournoi LoL ?
         </button>
       </div>
     </main>

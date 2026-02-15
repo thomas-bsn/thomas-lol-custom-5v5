@@ -19,6 +19,7 @@ export default function TeamsPage() {
 
     if (!state.teams || state.teams.team1.length !== 5 || state.teams.team2.length !== 5) {
       router.replace("/mode");
+      return;
     }
   }, [hydrated, state, router]);
 
@@ -28,19 +29,21 @@ export default function TeamsPage() {
   const { team1, team2, validated, source } = state.teams;
 
   function validate() {
+    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+
     update({
       ...state,
       teams: { ...state.teams!, validated: true },
-      game: { status: "wip", code: undefined },
+      game: { status: "running", code: fakeCode },
     });
 
     router.push("/game");
   }
 
   function backAndReset() {
-    const src = source; // "roulette" | "draft"
+    // on garde le mode d'origine pour revenir au bon écran
     update(createInitialState(state.players));
-    router.push(src === "draft" ? "/draft" : "/roulette");
+    router.push(source === "draft" ? "/draft" : "/roulette");
   }
 
   return (
