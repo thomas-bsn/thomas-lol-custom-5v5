@@ -73,7 +73,7 @@ export function normalizeForDupCheck(name: string): string {
 
 export function createInitialState(players: string[]): AppState {
   return {
-    version: 1,
+    version: 1 as const,
     players,
     mode: undefined,
     roulette: {
