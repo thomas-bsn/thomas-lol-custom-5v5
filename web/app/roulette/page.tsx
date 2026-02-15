@@ -103,6 +103,7 @@ export default function RoulettePage() {
   }
 
   function resetRoulette() {
+    if (!state) return;
     update(createInitialState(state.players));
     setIsSpinning(false);
     stopRolling();
