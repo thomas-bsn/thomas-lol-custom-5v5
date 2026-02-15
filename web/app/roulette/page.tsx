@@ -90,6 +90,7 @@ export default function RoulettePage() {
         update({
           ...nextStateBase,
           version: 1,
+          players: state.players,
           teams: { team1, team2, validated: false, source: "roulette" },
         });
       } else {
