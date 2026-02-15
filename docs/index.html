@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Community 5v5 Custom Games Tool</title>
+  <meta name="description" content="Private community web app for organizing LoL 5v5 custom games using Riot Tournament API (tournament codes) and post-game analytics." />
+  <style>
+    :root{
+      --bg:#0b1020; --card:#101a33; --text:#e7ecff; --muted:#aab4e6;
+      --line:rgba(255,255,255,.08); --accent:#7c5cff; --accent2:#00d4ff;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f7ff; --card:#ffffff; --text:#0f1633; --muted:#52608a;
+        --line:rgba(15,22,51,.10); --shadow: 0 18px 55px rgba(15,22,51,.12);
+      }
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans); background:radial-gradient(1100px 700px at 20% 0%, rgba(124,92,255,.25), transparent 55%),
+                                   radial-gradient(900px 600px at 85% 12%, rgba(0,212,255,.18), transparent 55%),
+                                   var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:1000px; margin:0 auto; padding:28px 18px 60px}
+    .nav{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:10px 12px; border:1px solid var(--line); border-radius:999px;
+      background:rgba(255,255,255,.03); backdrop-filter: blur(10px);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px}
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 0 4px rgba(124,92,255,.15);
+    }
+    .pill{
+      font-size:12px; color:var(--muted); border:1px solid var(--line);
+      padding:6px 10px; border-radius:999px;
+    }
+
+    .hero{margin-top:22px; padding:28px; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      overflow:hidden;
+    }
+    h1{margin:0 0 10px; font-size:36px; line-height:1.12; letter-spacing:-.4px}
+    .sub{margin:0; color:var(--muted); font-size:16px; line-height:1.55; max-width:76ch}
+    .ctaRow{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      border:1px solid var(--line); border-radius:12px; padding:10px 14px;
+      background:rgba(255,255,255,.04);
+      font-weight:600;
+    }
+    .btn strong{font-family:var(--mono); font-weight:700; font-size:12px; color:var(--muted)}
+    .btn.primary{
+      border-color:rgba(124,92,255,.35);
+      background:linear-gradient(135deg, rgba(124,92,255,.25), rgba(0,212,255,.12));
+    }
+
+    .grid{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; margin-top:14px;
+    }
+    @media (max-width: 860px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      border:1px solid var(--line); border-radius:var(--radius);
+      background:rgba(255,255,255,.03);
+      padding:18px; box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+    .card h2{margin:0 0 10px; font-size:16px; letter-spacing:.2px}
+    .list{margin:0; padding:0; list-style:none; display:grid; gap:10px}
+    .li{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:10px 12px; border:1px solid var(--line); border-radius:14px;
+      background:rgba(255,255,255,.02);
+    }
+    .ic{
+      flex:0 0 auto; width:22px; height:22px; border-radius:7px;
+      background:linear-gradient(135deg, rgba(124,92,255,.35), rgba(0,212,255,.18));
+      border:1px solid rgba(255,255,255,.12);
+      display:grid; place-items:center;
+      font-size:12px;
+    }
+    .li p{margin:0; color:var(--muted); line-height:1.45; font-size:13px}
+    .li b{color:var(--text); font-weight:700}
+
+    .code{
+      font-family:var(--mono); font-size:12px; color:var(--muted);
+      padding:12px 12px; border-radius:14px; border:1px solid var(--line);
+      background:rgba(0,0,0,.18); overflow:auto;
+    }
+    @media (prefers-color-scheme: light){
+      .code{background:rgba(15,22,51,.06)}
+    }
+    .note{
+      margin-top:12px; font-size:12px; color:var(--muted);
+    }
+
+    footer{
+      margin-top:16px; padding:14px 6px; color:var(--muted); font-size:12px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>Community 5v5 Tool</span>
+        <span class="pill">EUW · Custom Games</span>
+      </div>
+      <div class="pill">Not affiliated with Riot Games</div>
+    </div>
+
+    <section class="hero">
+      <h1>Private 5v5 custom games, automated.</h1>
+      <p class="sub">
+        A community web application to create League of Legends 5v5 custom matches using Riot’s Tournament API
+        (tournament codes), receive end-of-game callbacks, and compute internal performance metrics used for team balancing.
+      </p>
+
+      <div class="ctaRow">
+        <a class="btn primary" href="https://github.com/thomas-bsn/thomas-lol-custom-5v5" target="_blank" rel="noreferrer">
+          <span>Repository</span> <strong>GitHub</strong>
+        </a>
+        <a class="btn" href="/riot.txt" target="_blank" rel="noreferrer">
+          <span>Verification file</span> <strong>/riot.txt</strong>
+        </a>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>What it does</h2>
+        <ul class="list">
+          <li class="li">
+            <div class="ic">1</div>
+            <div>
+              <b>Create matches</b>
+              <p>Create private 5v5 custom games within a community (EUW).</p>
+            </div>
+          </li>
+          <li class="li">
+            <div class="ic">2</div>
+            <div>
+              <b>Generate tournament codes</b>
+              <p>Use Riot’s Tournament API to generate lobby codes for custom matches.</p>
+            </div>
+          </li>
+          <li class="li">
+            <div class="ic">3</div>
+            <div>
+              <b>Post-game analytics</b>
+              <p>Receive end-of-game callbacks, fetch match details, and compute internal “costs” metrics for balancing.</p>
+            </div>
+          </li>
+          <li class="li">
+            <div class="ic">4</div>
+            <div>
+              <b>Discord integration</b>
+              <p>Link players to Discord accounts and publish match summaries via a companion bot.</p>
+            </div>
+          </li>
+        </ul>
+
+        <p class="note">
+          No matchmaking. No monetization. No prize pools. Metrics are internal and have no monetary value.
+        </p>
+      </section>
+
+      <aside class="card">
+        <h2>Technical summary</h2>
+        <div class="code">
+Platform: EUW<br/>
+Mode: 5v5 blind pick (custom games)<br/>
+APIs: Tournament API (codes + callbacks), Match API (post-game details)<br/>
+Security: API key stored server-side only (never exposed to clients)<br/>
+Data: minimal match-related data retained for community analytics<br/>
+        </div>
+
+        <p class="note">
+          Riot Games, League of Legends and their related marks are trademarks of Riot Games, Inc.
+          This project is community-made and unaffiliated.
+        </p>
+      </aside>
+    </div>
+
+    <footer>
+      <div>© <span class="muted">Community project</span></div>
+      <div class="muted">Contact: via GitHub issues</div>
+    </footer>
+  </div>
+</body>
+</html>
