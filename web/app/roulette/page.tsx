@@ -51,6 +51,7 @@ export default function RoulettePage() {
   }
 
   function spin() {
+    if (!state) return;
     if (!canSpin) return;
 
     setIsSpinning(true);
