@@ -11,7 +11,7 @@ export default function ModePage() {
   useEffect(() => {
     if (!hydrated) return;
     if (!state || !state.players || state.players.length !== 10) {
-      router.replace("/setup");
+      router.replace("/picker");
     }
   }, [hydrated, state, router]);
 
@@ -66,7 +66,7 @@ export default function ModePage() {
       <div className="mt-6">
         <button
           className="rounded-lg border px-4 py-2"
-          onClick={() => router.push("/setup")}
+          onClick={() => router.push("/picker")}
         >
           Modifier les prénoms
         </button>

@@ -13,7 +13,7 @@ export default function GamePage() {
 
     // si pas de game, retour au début
     if (!state?.game?.code) {
-      router.replace("/setup");
+      router.replace("/picker");
     }
   }, [hydrated, state, router]);
 

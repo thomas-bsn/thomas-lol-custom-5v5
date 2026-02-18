@@ -16,7 +16,7 @@ export default function RoulettePage() {
   useEffect(() => {
     if (!hydrated) return;
     if (!state?.players || state.players.length !== 10) {
-      router.replace("/setup");
+      router.replace("/picker");
       return;
     }
     if (!state.roulette) {

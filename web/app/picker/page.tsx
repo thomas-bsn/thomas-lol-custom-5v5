@@ -25,8 +25,13 @@ export default function SetupPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (!hydrated) {
-    return <main className="p-6">Chargement…</main>;
+    return (
+      <main className="p-6 w-full">
+        <div className="max-w-xl mx-auto">Chargement…</div>
+      </main>
+    );
   }
+
 
   function onChange(i: number, v: string) {
     const next = inputs.slice();
@@ -42,7 +47,6 @@ export default function SetupPage() {
       return null;
     }
 
-    // doublons (case + espaces + accents simplifiés)
     const seen = new Set<string>();
     for (const p of players) {
       const key = normalizeForDupCheck(p);
@@ -66,50 +70,52 @@ export default function SetupPage() {
   }
 
   return (
-    <main className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold">Setup</h1>
-      <p className="text-sm opacity-80 mt-2">
-        Entre 10 prénoms uniques. On commence par la roulette.
-      </p>
+    <main className="p-6 w-full">
+      <div className="max-w-xl mx-auto">
+        <h1 className="text-2xl font-bold">Picker</h1>
+        <p className="text-sm opacity-80 mt-2">
+          Entre 10 prénoms uniques. On commence par la roulette.
+        </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-3">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-8 text-sm opacity-70">#{i + 1}</div>
-            <input
-              className="w-full rounded-lg border px-3 py-2"
-              placeholder={`Prénom ${i + 1}`}
-              value={inputs[i] ?? ""}
-              onChange={(e) => onChange(i, e.target.value)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {error && (
-        <div className="mt-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {error}
+        <div className="mt-6 grid grid-cols-1 gap-3">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-8 text-sm opacity-70">#{i + 1}</div>
+              <input
+                className="w-full rounded-lg border px-3 py-2"
+                placeholder={`Prénom ${i + 1}`}
+                value={inputs[i] ?? ""}
+                onChange={(e) => onChange(i, e.target.value)}
+              />
+            </div>
+          ))}
         </div>
-      )}
 
-      <div className="mt-6 flex gap-3">
-        <button
-          className="rounded-lg bg-black text-white px-4 py-2"
-          onClick={onContinue}
-        >
-          Continuer
-        </button>
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-        <button
-          className="rounded-lg border px-4 py-2"
-          onClick={() => {
-            setInputs(Array.from({ length: 10 }, () => ""));
-            setError(null);
-            update(null);
-          }}
-        >
-          Reset
-        </button>
+        <div className="mt-6 flex gap-3">
+          <button
+            className="rounded-lg bg-black text-white px-4 py-2"
+            onClick={onContinue}
+          >
+            Continuer
+          </button>
+
+          <button
+            className="rounded-lg border px-4 py-2"
+            onClick={() => {
+              setInputs(Array.from({ length: 10 }, () => ""));
+              setError(null);
+              update(null);
+            }}
+          >
+            Reset
+          </button>
+        </div>
       </div>
     </main>
   );

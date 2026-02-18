@@ -24,7 +24,7 @@ export default function HomePage() {
       return;
     }
 
-    router.replace("/setup");
+    router.replace("/picker");
   }, [hydrated, state, router]);
 
   return <main className="p-6">Chargement…</main>;

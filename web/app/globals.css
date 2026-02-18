@@ -23,6 +23,7 @@ body {
   background: #000; /* fallback si video fail */
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
 }
 
 /* === Background vidéo === */
@@ -41,20 +42,75 @@ body {
   transform: scale(1.1); /* évite les bords flous */
 }
 
-/* Overlay sombre pour lisibilité */
 .video-overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
 }
 
-/* Contenu au-dessus */
-.app-content {
+/* === App shell (sidebar + contenu) === */
+.shell {
   position: relative;
-  z-index: 1;
+  z-index: 1; /* au-dessus de la vidéo */
   min-height: 100vh;
+  display: flex;
 }
 
+/* === Sidebar === */
+.sidebar {
+  width: 220px;
+  flex: 0 0 220px;
+  padding: 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+
+  /* optionnel mais utile */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.brand {
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link {
+  padding: 10px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: rgba(231, 236, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(16, 26, 51, 0.25);
+}
+
+.link:hover {
+  background: rgba(16, 26, 51, 0.45);
+}
+
+.link.active {
+  border-color: rgba(124, 92, 255, 0.45);
+  background: rgba(124, 92, 255, 0.2);
+  color: white;
+}
+
+/* === Contenu === */
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+/* Header global */
 .app-header {
   text-align: center;
   margin: 2rem 0 3rem;
@@ -70,4 +126,17 @@ body {
   margin-top: 0.25rem;
   font-size: 0.95rem;
   opacity: 0.75;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+.content-inner{
+  width: 100%;
+  max-width: 640px; /* ajuste: 520/600/700 */
+  margin: 0 auto;
 }
