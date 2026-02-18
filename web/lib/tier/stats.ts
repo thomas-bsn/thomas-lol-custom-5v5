@@ -18,7 +18,6 @@ export function stddev(xs: number[]) {
 }
 
 export function stabilityLabel(sd: number) {
-  // seuils simples, ajustables
   if (sd < 6) return { label: 'Stable', tone: 'good' as const };
   if (sd <= 10) return { label: 'Moyen', tone: 'mid' as const };
   return { label: 'Instable', tone: 'bad' as const };
@@ -26,53 +25,58 @@ export function stabilityLabel(sd: number) {
 
 // ---------- Normalisation ----------
 
-function toNumberArray(raw: any): number[] {
+function toNumberArray(raw: unknown): number[] {
   if (Array.isArray(raw)) {
-    return raw.map(Number).filter(n => Number.isFinite(n));
+    return raw.map(Number).filter((n: number) => Number.isFinite(n));
   }
 
   if (typeof raw === 'string') {
     return raw
       .split(',')
       .map(s => Number(s.trim()))
-      .filter(n => Number.isFinite(n));
+      .filter((n: number) => Number.isFinite(n));
   }
 
-  if (raw && typeof raw === 'object' && Array.isArray(raw.values)) {
-    return raw.values.map(Number).filter((n: number) => Number.isFinite(n));
+  if (raw && typeof raw === 'object' && Array.isArray((raw as any).values)) {
+    return (raw as any).values.map(Number).filter((n: number) => Number.isFinite(n));
   }
 
   return [];
 }
 
-function normalizeRoleStats(raw: any): RoleStat[] {
+function normalizeRoleStats(raw: unknown): RoleStat[] {
   const arr = Array.isArray(raw) ? raw : [];
   return arr
-    .map((r: any) => ({
+    .map((r: any): RoleStat => ({
       role: String(r?.role ?? '').trim(),
       games: Number.isFinite(Number(r?.games)) ? Number(r.games) : 0,
       avgScore: Number.isFinite(Number(r?.avgScore)) ? Number(r.avgScore) : 0,
     }))
-    .filter(r => r.role.length > 0)
+    .filter((r: RoleStat) => r.role.length > 0)
     .sort((a, b) => b.games - a.games);
 }
 
-export function normalizeChampStats(raw: any): ChampStat[] {
+export function normalizeChampStats(raw: unknown): ChampStat[] {
   // raw peut être:
   // - details.champStats (array)
   // - { champStats: [...] }
-  const arr = Array.isArray(raw) ? raw : Array.isArray(raw?.champStats) ? raw.champStats : [];
+  const arr = Array.isArray(raw)
+    ? raw
+    : Array.isArray((raw as any)?.champStats)
+      ? (raw as any).champStats
+      : [];
+
   return arr
-    .map((c: any) => ({
-      name: String(c?.name ?? '').trim(),
+    .map((c: any): ChampStat => ({
+      // ton type attend "key". On accepte plusieurs noms d'entrée possibles.
+      key: String(c?.key ?? c?.name ?? c?.champ ?? c?.champion ?? '').trim(),
       games: Number.isFinite(Number(c?.games)) ? Number(c.games) : 0,
       avgScore: Number.isFinite(Number(c?.avgScore)) ? Number(c.avgScore) : 0,
     }))
-    .filter(c => c.name.length > 0);
+    .filter((c: ChampStat) => c.key.length > 0);
 }
 
 export function normalizeDetails(raw: any): PlayerDetails {
-  // Supporte plusieurs shapes possibles
   const winrateRaw = raw?.winrate ?? raw?.global?.winrate;
   const winrate =
     winrateRaw == null || Number.isNaN(Number(winrateRaw)) ? undefined : Number(winrateRaw);
@@ -93,7 +97,7 @@ export function normalizeDetails(raw: any): PlayerDetails {
 // ---------- Champions compute ----------
 
 export function computeChampions(champStats: ChampStat[], totalGames: number) {
-  const safe = Array.isArray(champStats) ? champStats : [];
+  const safe: ChampStat[] = Array.isArray(champStats) ? champStats : [];
 
   const minGamesBestPerf = clamp(Math.ceil((totalGames || 0) * 0.2), 3, 10);
 
@@ -102,7 +106,7 @@ export function computeChampions(champStats: ChampStat[], totalGames: number) {
     .slice(0, 5);
 
   const bestPerf = [...safe]
-    .filter(c => c.games >= minGamesBestPerf)
+    .filter((c: ChampStat) => c.games >= minGamesBestPerf)
     .sort((a, b) => b.avgScore - a.avgScore || b.games - a.games)
     .slice(0, 5);
 

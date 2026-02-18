@@ -1,11 +1,9 @@
 export type Player = {
   id: string;          // slug stable pour URL + fichier JSON
   name: string;
-
   cost: number | null;
   score: number;
   games: number;
-
   mainRole?: string;
   roles?: string[];
   avatarUrl?: string;
