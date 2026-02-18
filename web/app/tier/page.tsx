@@ -102,10 +102,13 @@ export default function TierPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-6 w-full">
-      <div className="flex items-end justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-white">Tier List</h1>
-        <div className="text-sm text-white/50">{players.length} joueurs</div>
+    <div className="space-y-6 w-full">
+      {/* Header aligné EXACTEMENT comme les blocs Cost (même max-w + mx-auto + padding) */}
+      <div className="w-full max-w-[1600px] mx-auto px-5">
+        <div className="flex items-end justify-between gap-4">
+          <h1 className="text-2xl font-semibold text-white">Tier List</h1>
+          <div className="text-sm text-white/50">{players.length} joueurs</div>
+        </div>
       </div>
 
       {COSTS.map(cost => {
@@ -113,6 +116,7 @@ export default function TierPage() {
 
         return (
           <div
+            key={cost}
             className="
               w-full max-w-[1600px] mx-auto
               rounded-2xl border border-white/10 bg-black/25 overflow-hidden
