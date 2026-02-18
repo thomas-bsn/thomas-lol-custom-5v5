@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "player": {
+    "id": "ares",
+    "displayName": "ARES",
+    "avatarUrl": "/avatars/ares.png",
+    "cost": 6,
+    "mainRole": "top"
+  },
+  "summary": {
+    "games": 11,
+    "wins": 7,
+    "winrate": 0.6364,
+    "globalScore": 73.4,
+    "lastUpdated": "2026-02-18T00:30:00Z"
+  },
+  "stability": {
+    "window": {
+      "type": "lastN",
+      "n": 10
+    },
+    "stddev": 2.1,
+    "label": "stable",
+    "thresholds": { "stableLt": 6, "mediumLte": 10 }
+  },
+  "recentScores": {
+    "order": "oldestToNewest",
+    "values": [69, 72, 74, 73, 76, 71, 74, 70, 75, 73]
+  },
+  "roles": [
+    { "role": "top", "games": 7, "avgScore": 74.2 },
+    { "role": "jungle", "games": 4, "avgScore": 69.1 }
+  ],
+  "champions": {
+    "mostPlayed": [
+      { "key": "Darius", "games": 5, "avgScore": 75.0 },
+      { "key": "Garen", "games": 4, "avgScore": 70.2 },
+      { "key": "Jax", "games": 3, "avgScore": 72.4 },
+      { "key": "Renekton", "games": 3, "avgScore": 68.0 },
+      { "key": "Ornn", "games": 2, "avgScore": 66.5 }
+    ],
+    "bestPerformance": {
+      "minGamesRule": { "type": "pctOfTotal", "pct": 0.2, "clamp": { "min": 3, "max": 10 } },
+      "items": [
+        { "key": "Darius", "games": 5, "avgScore": 75.0 },
+        { "key": "Jax", "games": 3, "avgScore": 72.4 },
+        { "key": "Garen", "games": 4, "avgScore": 70.2 }
+      ]
+    }
+  },
+  "sources": {
+    "playersList": "/mock/players.txt",
+    "detailsFile": "/players/ares.json",
+    "notes": "Mock statique. Champs calculés offline."
+  }
+}

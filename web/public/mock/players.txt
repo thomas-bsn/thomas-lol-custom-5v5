@@ -1,0 +1,38 @@
+# id;name;cost;score;games;mainRole;roles;avatarUrl
+
+tiktoks99;+99 tiktoks;7;77.6;12;mid;mid,top;https://cdn.discordapp.com/avatars/188407821300137984/51c3617bbe2eeb228e2b0c3af958dcc5.png?size=128
+
+ares;ARES;6;73.4;11;top;top,jungle;
+xavierhz;Xavier.HZ;6;71.8;10;mid;mid,adc;
+srwx;srwx;6;70.1;12;adc;adc;
+
+syphilis-kabukicho;SYPHILIS DE KABUKICHO;5;69.9;10;adc;adc;
+kelio;Kélio;5;69.3;9;mid;mid;
+killcharlie;#killcharlie;5;68.7;11;adc;adc,mid;
+adri;adri;5;68.2;10;mid;mid;
+samy;Samy;5;67.8;10;top;top;
+vsuski;vsuski;5;67.0;9;mid;mid;
+
+uu;uu;4;66.9;9;adc;adc;
+earth;Earth;4;66.4;10;top;top;
+gilgamesh;Gilgamesh;4;63.8;8;jungle;jungle;
+raptorz;Raptorz;4;62.7;9;jungle;jungle;
+uchuu;UCHUU;4;61.0;6;mid;mid,top;
+alecks;Alecks;4;58.9;8;top;top;
+gyze;Gyze;4;57.2;8;jungle;jungle,support;
+
+rem-la-fraude;Rem la Fraude;3;55.8;9;top;top,jungle;
+chupa-chupa;Chupa Chùpa;3;53.5;7;support;support;
+nab;nab;3;46.3;8;mid;mid;
+fukuoka;Fukuoka;3;47.5;7;jungle;jungle;
+nitsuomi;nitsuomi;3;45.0;7;support;support;
+sz;Sz;3;44.2;6;support;support;
+
+coach;MOI JE SUIS COACH;2;42.8;6;adc;adc;
+kraims-spas12;Kraims SPAS-12;2;41.9;7;jungle;jungle;
+pururuuu;Pururuuu;2;34.6;8;adc;adc;
+
+crevette-shuriima;CREVETTE DE SHURIIMA;1;36.1;9;support;support;
+poupee;poupée;1;32.1;10;support;support;
+
+unknown;^^;;;2;mid;mid;

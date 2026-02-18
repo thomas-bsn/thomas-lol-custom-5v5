@@ -42,8 +42,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="content">
             <div className="content-inner">
               <header className="app-header">
-                <h1 className="app-title">Team Picker</h1>
-                <p className="app-subtitle">Création d’équipes rapides</p>
+                <h1 className="app-title">THOMA$ - LoL Tournamement</h1>
+                <p className="app-subtitle">yuuuuuuh</p>
               </header>
 
               <main>{children}</main>
