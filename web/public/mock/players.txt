@@ -1,6 +1,6 @@
 # id;name;cost;score;games;mainRole;roles;avatarUrl
 
-tiktoks99;+99 tiktoks;7;77.6;12;mid;mid,top;https://cdn.discordapp.com/avatars/188407821300137984/51c3617bbe2eeb228e2b0c3af958dcc5.png?size=128
+tiktoks99;MILK ENJOYER#EUW;7;77.6;12;mid;mid,top;https://ddragon.leagueoflegends.com/cdn/14.3.1/img/profileicon/3219.png
 
 ares;ARES;6;73.4;11;top;top,jungle;
 xavierhz;Xavier.HZ;6;71.8;10;mid;mid,adc;
