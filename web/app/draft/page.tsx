@@ -9,13 +9,10 @@ function otherTeam(t: 1 | 2): 1 | 2 {
   return t === 1 ? 2 : 1;
 }
 
-// Snake sur 8 picks:
-// first, other, other, first, first, other, other, first
-const SNAKE_PATTERN: Array<0 | 1> = [0, 1, 1, 0, 0, 1, 1, 0];
+
 
 function getTurn(firstPicker: 1 | 2, pickIndex: number): 1 | 2 {
-  const p = SNAKE_PATTERN[pickIndex] ?? 0;
-  return p === 0 ? firstPicker : otherTeam(firstPicker);
+  return pickIndex % 2 === 0 ? firstPicker : otherTeam(firstPicker);
 }
 
 export default function DraftPage() {
@@ -240,7 +237,7 @@ export default function DraftPage() {
             onClick={flipCoinAndStart}
             disabled={!canFlip || draft.phase !== "captains"}
           >
-            Pile ou face, puis commencer
+            Choisir aléatoirement qui commence
           </button>
 
           <button className="rounded-lg border px-4 py-2" onClick={resetDraft}>
