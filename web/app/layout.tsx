@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="content-inner">
               <header className="app-header">
                 <h1 className="app-title">THOMA$ - LoL Tournamement</h1>
-                <p className="app-subtitle">yuuuuuuh</p>
+                <p className="app-subtitle">samy</p>
               </header>
 
               <main>{children}</main>
