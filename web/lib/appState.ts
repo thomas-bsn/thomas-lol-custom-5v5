@@ -1,40 +1,48 @@
-export type Mode = "roulette" | "draft";
+export type Mode = "roulette" | "draft" | "balancedRoulette";
+
+export type Player = {
+  prenom: string;
+  rank: string;
+  mmr: number;
+};
 
 export type AppState = {
   version: 1;
-  players: string[]; // length 10
+  players: Player[];
+
   mode?: Mode;
 
   roulette?: {
-    remaining: string[];
-    history: string[];
-    lastPicked?: string;
+    remaining: Player[];
+    history: Player[];
+    lastPicked?: Player;
   };
 
   draft?: {
     phase: "captains" | "picking" | "done";
-    captain1?: string;
-    captain2?: string;
 
-    // après pile ou face
-    firstPicker?: 1 | 2; // 1 = team1 commence, 2 = team2 commence
+    captain1?: Player;
+    captain2?: Player;
 
-    available: string[];
-    team1: string[];
-    team2: string[];
-    pickIndex: number; // 0..7 (8 picks)
+    firstPicker?: 1 | 2;
+
+    available: Player[];
+    team1: Player[];
+    team2: Player[];
+
+    pickIndex: number;
   };
 
   teams?: {
-    team1: string[];
-    team2: string[];
+    team1: Player[];
+    team2: Player[];
     validated: boolean;
-    source: "roulette" | "draft";
+    source: "roulette" | "draft" | "balanced";
   };
 
   game?: {
     status: "wip" | "running" | "ended";
-    code?: string; // future: code reçu du backend
+    code?: string;
   };
 };
 
@@ -71,36 +79,41 @@ export function normalizeForDupCheck(name: string): string {
   return normalizeName(name).toLocaleLowerCase("fr-FR");
 }
 
-export function createInitialState(players: string[]): AppState {
+export function createInitialState(players: Player[]): AppState {
   return {
-    version: 1 as const,
+    version: 1,
     players,
     mode: undefined,
+
     roulette: {
       remaining: [...players],
       history: [],
       lastPicked: undefined,
     },
+
     draft: {
       phase: "captains",
       captain1: undefined,
       captain2: undefined,
       firstPicker: undefined,
+
       available: [...players],
       team1: [],
       team2: [],
       pickIndex: 0,
     },
+
     teams: undefined,
   };
 }
 
-export function createDraftState(players: string[]): AppState["draft"] {
+export function createDraftState(players: Player[]): AppState["draft"] {
   return {
     phase: "captains",
     captain1: undefined,
     captain2: undefined,
     firstPicker: undefined,
+
     available: [...players],
     team1: [],
     team2: [],

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/useAppState";
 
 export default function ModePage() {
   const router = useRouter();
   const { state, update, hydrated } = useAppState();
+
+  const [rouletteType, setRouletteType] = useState<"random" | "balanced">("random");
 
   useEffect(() => {
     if (!hydrated) return;
@@ -36,18 +38,57 @@ export default function ModePage() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-3">
-        <button
-          className="rounded-lg border px-4 py-3 text-left"
-          onClick={() => {
-            update({ ...state, mode: "roulette" });
-            router.push("/roulette");
-          }}
-        >
+
+        {/* ROULETTE */}
+
+        <div className="rounded-lg border px-4 py-3">
           <div className="font-semibold">Roulette</div>
-          <div className="text-sm opacity-80">
-            Tirage aléatoire parmi les joueurs restants.
+          <div className="text-sm opacity-80 mb-3">
+            Tirage automatique pour former deux équipes.
           </div>
-        </button>
+
+          <div className="flex flex-col gap-2 text-sm">
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={rouletteType === "random"}
+                onChange={() => setRouletteType("random")}
+              />
+              Aléatoire
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={rouletteType === "balanced"}
+                onChange={() => setRouletteType("balanced")}
+              />
+              Équilibrée (basée sur le MMR)
+            </label>
+
+          </div>
+
+          <button
+            className="mt-3 rounded-lg bg-black text-white px-4 py-2"
+            onClick={() => {
+
+              update({
+                ...state,
+                mode: rouletteType === "balanced"
+                  ? "balancedRoulette"
+                  : "roulette"
+              });
+
+              router.push("/roulette");
+
+            }}
+          >
+            Commencer la roulette
+          </button>
+        </div>
+
+        {/* DRAFT */}
 
         <button
           className="rounded-lg border px-4 py-3 text-left"
@@ -61,6 +102,7 @@ export default function ModePage() {
             Deux capitaines, pile ou face, puis draft snake.
           </div>
         </button>
+
       </div>
 
       <div className="mt-6">

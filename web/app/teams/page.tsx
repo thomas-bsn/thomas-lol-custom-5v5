@@ -66,8 +66,8 @@ export default function TeamsPage() {
           <h2 className="font-semibold">Team 1</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {team1.map((p) => (
-              <span key={p} className="text-sm rounded-full border px-3 py-1">
-                {p}
+              <span key={p.prenom} className="text-sm rounded-full border px-3 py-1">
+                {p.prenom} • {p.rank} ({p.mmr})
               </span>
             ))}
           </div>
@@ -77,8 +77,8 @@ export default function TeamsPage() {
           <h2 className="font-semibold">Team 2</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {team2.map((p) => (
-              <span key={p} className="text-sm rounded-full border px-3 py-1">
-                {p}
+              <span key={p.prenom} className="text-sm rounded-full border px-3 py-1">
+                {p.prenom} • {p.rank} ({p.mmr})
               </span>
             ))}
           </div>
