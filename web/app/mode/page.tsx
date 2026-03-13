@@ -125,7 +125,7 @@ export default function ModePage() {
           <div className="font-semibold">Draft</div>
 
           <div className="text-sm opacity-80">
-            Deux capitaines, pile ou face, puis draft snake.
+            Deux capitaines, pile ou face, puis choix de joueur.
           </div>
 
         </button>
