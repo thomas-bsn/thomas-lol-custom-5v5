@@ -3,15 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/useAppState";
+import {
+  createRouletteSession,
+  createDraftSession
+} from "@/lib/appState";
 
 export default function ModePage() {
   const router = useRouter();
   const { state, update, hydrated } = useAppState();
 
-  const [rouletteType, setRouletteType] = useState<"random" | "balanced">("random");
+  const [rouletteType, setRouletteType] =
+    useState<"random" | "balanced">("random");
 
   useEffect(() => {
     if (!hydrated) return;
+
     if (!state || !state.players || state.players.length !== 10) {
       router.replace("/picker");
     }
@@ -28,10 +34,14 @@ export default function ModePage() {
 
       <div className="mt-4 rounded-lg border p-3">
         <div className="text-sm opacity-70 mb-2">Joueurs</div>
+
         <div className="flex flex-wrap gap-2">
           {players.map((p) => (
-            <span key={p} className="text-sm rounded-full border px-3 py-1">
-              {p}
+            <span
+              key={p.prenom}
+              className="text-sm rounded-full border px-3 py-1"
+            >
+              {p.prenom}
             </span>
           ))}
         </div>
@@ -42,7 +52,9 @@ export default function ModePage() {
         {/* ROULETTE */}
 
         <div className="rounded-lg border px-4 py-3">
+
           <div className="font-semibold">Roulette</div>
+
           <div className="text-sm opacity-80 mb-3">
             Tirage automatique pour former deux équipes.
           </div>
@@ -73,11 +85,14 @@ export default function ModePage() {
             className="mt-3 rounded-lg bg-black text-white px-4 py-2"
             onClick={() => {
 
+              const session = createRouletteSession(players);
+
               update({
                 ...state,
                 mode: rouletteType === "balanced"
-                  ? "balancedRoulette"
-                  : "roulette"
+                  ? "balanced"
+                  : "roulette",
+                session
               });
 
               router.push("/roulette");
@@ -86,6 +101,7 @@ export default function ModePage() {
           >
             Commencer la roulette
           </button>
+
         </div>
 
         {/* DRAFT */}
@@ -93,14 +109,25 @@ export default function ModePage() {
         <button
           className="rounded-lg border px-4 py-3 text-left"
           onClick={() => {
-            update({ ...state, mode: "draft" });
+
+            const session = createDraftSession(players);
+
+            update({
+              ...state,
+              mode: "draft",
+              session
+            });
+
             router.push("/draft");
+
           }}
         >
           <div className="font-semibold">Draft</div>
+
           <div className="text-sm opacity-80">
             Deux capitaines, pile ou face, puis draft snake.
           </div>
+
         </button>
 
       </div>
@@ -113,6 +140,7 @@ export default function ModePage() {
           Modifier les prénoms
         </button>
       </div>
+
     </main>
   );
 }

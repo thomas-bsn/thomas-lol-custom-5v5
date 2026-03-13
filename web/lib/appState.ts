@@ -1,4 +1,4 @@
-export type Mode = "roulette" | "draft" | "balancedRoulette";
+export type Mode = "roulette" | "draft" | "balanced";
 
 export type Player = {
   prenom: string;
@@ -6,55 +6,73 @@ export type Player = {
   mmr: number;
 };
 
+export type Teams = {
+  team1: Player[];
+  team2: Player[];
+};
+
+export type RouletteSession = {
+  remaining: Player[];
+  history: Player[];
+  lastPicked?: Player;
+};
+
+export type DraftSession = {
+  phase: "captains" | "picking" | "done";
+
+  captain1?: Player;
+  captain2?: Player;
+
+  firstPicker?: 1 | 2;
+
+  available: Player[];
+  team1: Player[];
+  team2: Player[];
+
+  pickIndex: number;
+};
+
+export type BalancedSession = {
+  players: Player[];
+};
+
+export type Session =
+  | { type: "roulette"; data: RouletteSession }
+  | { type: "draft"; data: DraftSession }
+  | { type: "balanced"; data: BalancedSession };
+
+export type GameState = {
+  status: "wip" | "running" | "ended";
+  code?: string;
+};
+
 export type AppState = {
-  version: 1;
+  version: 2;
+
   players: Player[];
 
   mode?: Mode;
 
-  roulette?: {
-    remaining: Player[];
-    history: Player[];
-    lastPicked?: Player;
-  };
+  session?: Session;
 
-  draft?: {
-    phase: "captains" | "picking" | "done";
+  result?: Teams;
 
-    captain1?: Player;
-    captain2?: Player;
-
-    firstPicker?: 1 | 2;
-
-    available: Player[];
-    team1: Player[];
-    team2: Player[];
-
-    pickIndex: number;
-  };
-
-  teams?: {
-    team1: Player[];
-    team2: Player[];
-    validated: boolean;
-    source: "roulette" | "draft" | "balanced";
-  };
-
-  game?: {
-    status: "wip" | "running" | "ended";
-    code?: string;
-  };
+  game?: GameState;
 };
 
 const STORAGE_KEY = "team-picker-state";
 
 export function loadState(): AppState | null {
   if (typeof window === "undefined") return null;
+
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
+
     const parsed = JSON.parse(raw) as AppState;
-    if (!parsed || parsed.version !== 1) return null;
+
+    if (!parsed || parsed.version !== 2) return null;
+
     return parsed;
   } catch {
     return null;
@@ -81,42 +99,48 @@ export function normalizeForDupCheck(name: string): string {
 
 export function createInitialState(players: Player[]): AppState {
   return {
-    version: 1,
+    version: 2,
     players,
-    mode: undefined,
+  };
+}
 
-    roulette: {
+export function createRouletteSession(players: Player[]): Session {
+  return {
+    type: "roulette",
+    data: {
       remaining: [...players],
       history: [],
       lastPicked: undefined,
     },
+  };
+}
 
-    draft: {
+export function createDraftSession(players: Player[]): Session {
+  return {
+    type: "draft",
+    data: {
       phase: "captains",
+
       captain1: undefined,
       captain2: undefined,
+
       firstPicker: undefined,
 
       available: [...players],
       team1: [],
       team2: [],
+
       pickIndex: 0,
     },
-
-    teams: undefined,
   };
 }
 
-export function createDraftState(players: Player[]): AppState["draft"] {
+export function createBalancedSession(players: Player[]): Session {
   return {
-    phase: "captains",
-    captain1: undefined,
-    captain2: undefined,
-    firstPicker: undefined,
-
-    available: [...players],
-    team1: [],
-    team2: [],
-    pickIndex: 0,
+    type: "balanced",
+    data: {
+      players: [...players],
+    },
   };
 }
+

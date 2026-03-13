@@ -2,21 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createInitialState } from "@/lib/appState";
+import { createInitialState, Player } from "@/lib/appState";
 import { useAppState } from "@/lib/useAppState";
-
-type Player = {
-  prenom: string;
-  riotid: string;
-};
+import { loadPlayers } from "@/lib/players/loadPlayers";
+import { mapDBPlayer } from "@/lib/players/mapDBPlayer";
+import type { DBPlayer } from "@/lib/players/types";
 
 export default function SetupPage() {
   const router = useRouter();
   const { update, hydrated } = useAppState();
 
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<DBPlayer[]>([]);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Player[]>([]);
+  const [selected, setSelected] = useState<DBPlayer[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
@@ -24,14 +22,14 @@ export default function SetupPage() {
   const [newRiotId, setNewRiotId] = useState("");
 
   useEffect(() => {
-    fetch("/mock/players_bdd.json")
-      .then((r) => r.json())
-      .then((data) => setPlayers(data));
+    loadPlayers().then(setPlayers);
   }, []);
 
   const filteredPlayers = useMemo(() => {
     return players.filter((p) =>
-      `${p.prenom} ${p.riotid}`.toLowerCase().includes(search.toLowerCase())
+      `${p.prenom} ${p.riotid}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
     );
   }, [players, search]);
 
@@ -43,9 +41,10 @@ export default function SetupPage() {
     );
   }
 
-  function addPlayer(player: Player) {
+  function addPlayer(player: DBPlayer) {
     if (selected.length >= 10) return;
     if (selected.some((p) => p.riotid === player.riotid)) return;
+
     setSelected([...selected, player]);
   }
 
@@ -59,22 +58,25 @@ export default function SetupPage() {
       return;
     }
 
-    const names = selected.map((p) => p.prenom);
-    update(createInitialState(names));
+    const formattedPlayers: Player[] = selected.map(mapDBPlayer);
+
+    update(createInitialState(formattedPlayers));
+
     router.push("/mode");
   }
 
-  // MOCK CREATE PLAYER (plus tard → backend)
-  function createPlayer(player: Player) {
+  function createPlayer(player: DBPlayer) {
     setPlayers((prev) => [...prev, player]);
   }
 
   function handleCreatePlayer() {
     if (!newPrenom.trim() || !newRiotId.trim()) return;
 
-    const player: Player = {
+    const player: DBPlayer = {
       prenom: newPrenom.trim(),
       riotid: newRiotId.trim(),
+      rankTier: "Gold",
+      rankDivision: 4
     };
 
     createPlayer(player);
@@ -87,12 +89,13 @@ export default function SetupPage() {
   return (
     <main className="p-6 w-full">
       <div className="max-w-xl mx-auto">
+
         <h1 className="text-2xl font-bold">Picker</h1>
+
         <p className="text-sm opacity-80 mt-2">
           Sélectionne 10 joueurs dans la liste.
         </p>
 
-        {/* SEARCH */}
         <input
           className="w-full mt-6 rounded-lg border px-3 py-2"
           placeholder="Chercher un joueur ou riot id..."
@@ -111,24 +114,28 @@ export default function SetupPage() {
           </button>
         </div>
 
-        {/* LISTE JOUEURS */}
         <div className="mt-4 max-h-60 overflow-y-scroll border rounded-lg">
+
           {filteredPlayers.length === 0 && (
             <div className="p-6 text-center opacity-70 flex flex-col gap-3">
+
               <span>Aucun joueur trouvé</span>
 
               <button
                 onClick={() => {
-                  setNewPrenom(search)
-                  setShowModal(true)
+                  setNewPrenom(search);
+                  setShowModal(true);
                 }}
                 className="border rounded px-3 py-1 text-sm hover:bg-white/10 self-center"
               >
                 Ajouter "{search}"
               </button>
+
             </div>
           )}
+
           {filteredPlayers.map((p) => {
+
             const isSelected = selected.some(
               (s) => s.riotid === p.riotid
             );
@@ -140,9 +147,15 @@ export default function SetupPage() {
                 className={`flex justify-between items-center px-3 py-2 cursor-pointer transition
                 ${isSelected ? "opacity-40" : "hover:bg-white/10"}`}
               >
+
                 <div className="flex flex-col">
+
                   <span className="font-medium">{p.prenom}</span>
-                  <span className="text-xs opacity-60">{p.riotid}</span>
+
+                  <span className="text-xs opacity-60">
+                    {p.riotid}
+                  </span>
+
                 </div>
 
                 <button
@@ -156,28 +169,36 @@ export default function SetupPage() {
                 >
                   {isSelected ? "Sélectionné" : "Ajouter"}
                 </button>
+
               </div>
             );
           })}
+
         </div>
 
-        {/* JOUEURS SELECTIONNES */}
         <div className="mt-6">
+
           <h2 className="font-semibold">
             Sélection ({selected.length}/10)
           </h2>
 
           <div className="mt-3 grid grid-cols-1 gap-2">
+
             {selected.map((p) => (
+
               <div
                 key={p.riotid}
                 className="flex justify-between items-center border rounded px-3 py-2"
               >
+
                 <div>
+
                   <span className="font-medium">{p.prenom}</span>
+
                   <span className="text-xs opacity-60 ml-2">
                     {p.riotid}
                   </span>
+
                 </div>
 
                 <button
@@ -186,9 +207,13 @@ export default function SetupPage() {
                 >
                   retirer
                 </button>
+
               </div>
+
             ))}
+
           </div>
+
         </div>
 
         {error && (
@@ -197,8 +222,8 @@ export default function SetupPage() {
           </div>
         )}
 
-        {/* ACTIONS */}
         <div className="mt-6 flex gap-3">
+
           <button
             className="rounded-lg bg-black text-white px-4 py-2"
             onClick={onContinue}
@@ -215,13 +240,16 @@ export default function SetupPage() {
           >
             Reset
           </button>
+
         </div>
+
       </div>
 
-      {/* MODAL AJOUT JOUEUR */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+
           <div className="bg-neutral-900 p-6 rounded-xl w-80 border">
+
             <h2 className="text-lg font-semibold mb-4">
               Ajouter un joueur
             </h2>
@@ -241,6 +269,7 @@ export default function SetupPage() {
             />
 
             <div className="flex justify-end gap-2">
+
               <button
                 onClick={() => setShowModal(false)}
                 className="border px-3 py-1 rounded"
@@ -254,8 +283,11 @@ export default function SetupPage() {
               >
                 Ajouter
               </button>
+
             </div>
+
           </div>
+
         </div>
       )}
     </main>
