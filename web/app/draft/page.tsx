@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/useAppState";
 import { createDraftSession, createInitialState, Player } from "@/lib/appState";
-import { teamScore, getTurn, diffColor, evaluatePick, pickAdviceColor } from "@/lib/draft/draftUtils";
+import { teamScore, getTurn, diffColor, evaluatePick, pickAdviceColor, pickAdviceEmoji } from "@/lib/draft/draftUtils";
 import { pickPlayer } from "@/lib/draft/draftEngine";
 
 export default function DraftPage() {
@@ -297,6 +297,29 @@ export default function DraftPage() {
             <section className="border rounded-lg p-4">
 
               <h3 className="font-semibold">Disponibles</h3>
+              <div className="mt-2 flex flex-wrap gap-3 text-xs opacity-80">
+
+                <span className="flex items-center gap-1">
+                  🟢 <span>équilibré</span>
+                </span>
+
+                <span className="flex items-center gap-1">
+                  🟡 <span>correct</span>
+                </span>
+
+                <span className="flex items-center gap-1">
+                  🟠 <span>déséquilibré</span>
+                </span>
+
+                <span className="flex items-center gap-1">
+                  🔴 <span>très déséquilibré</span>
+                </span>
+
+                <span className="flex items-center gap-1">
+                  💀 <span>catastrophe</span>
+                </span>
+
+              </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
 
@@ -318,8 +341,8 @@ export default function DraftPage() {
                       </span>
 
                       {showAdvice && (
-                        <span className={`text-xs px-2 py-0.5 rounded ${color}`}>
-                          +{diff}
+                        <span className="text-sm">
+                          {pickAdviceEmoji(diff)}
                         </span>
                       )}
 

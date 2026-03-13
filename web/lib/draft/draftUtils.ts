@@ -79,3 +79,14 @@ export function diffLabel(diff: number) {
 
   return { text: "Équipes très déséquilibrées", color: "bg-red-600 text-white" }
 }
+
+export function pickAdviceEmoji(diff: number) {
+
+  if (diff <= 200) return "🟢"
+  if (diff <= 600) return "🟡"
+  if (diff <= 1200) return "🟠"
+  if (diff <= 2000) return "🔴"
+
+  return "💀"
+
+}
