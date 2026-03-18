@@ -73,6 +73,7 @@ export default function AccountPage() {
   const [peakSeason, setPeakSeason] = useState("");
   const [peakLp, setPeakLp] = useState("");
   const [savingPeak, setSavingPeak] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState("");
 
   useEffect(() => {
     const username = localStorage.getItem("discord_username");
@@ -120,6 +121,7 @@ export default function AccountPage() {
       const player = players.find(p => p.id === selectedPlayerId);
       if (player) setLinkedPlayer({ ...player, peakTier: null, peakDivision: null, peakSeason: null });
       setShowPicker(false);
+      setPlayerSearch("");
       setSuccess("Compte lié avec succès !");
       setTimeout(() => setSuccess(null), 3000);
     } catch {
@@ -191,6 +193,11 @@ export default function AccountPage() {
   const tierColor = linkedPlayer ? TIER_COLORS[linkedPlayer.rankTier] ?? "rgba(255,255,255,0.4)" : null;
   const isMasterPlus = peakTier && ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(peakTier);
   const canSavePeak = peakTier && peakSeason && (isMasterPlus || peakTier === "UNRANKED" || peakDivision);
+
+  const filteredPlayers = players.filter(p =>
+    p.prenom.toLowerCase().includes(playerSearch.toLowerCase()) ||
+    p.riotId.toLowerCase().includes(playerSearch.toLowerCase())
+  );
 
   return (
     <main style={{ padding: "0 48px 40px", width: "100%" }}>
@@ -377,9 +384,29 @@ export default function AccountPage() {
       {showPicker && (
         <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.75)", zIndex: 50 }}>
           <div style={{ background: "#0e0e0e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", padding: "24px", width: "380px" }}>
-            <h2 style={{ color: "white", fontWeight: 700, fontSize: "15px", margin: "0 0 16px" }}>Choisir mon compte LoL</h2>
+            <h2 style={{ color: "white", fontWeight: 700, fontSize: "15px", margin: "0 0 14px" }}>Choisir mon compte LoL</h2>
+
+            {/* Barre de recherche */}
+            <input
+              type="text"
+              placeholder="Rechercher par nom ou Riot ID…"
+              value={playerSearch}
+              onChange={e => setPlayerSearch(e.target.value)}
+              style={{
+                width: "100%", padding: "8px 12px", marginBottom: "10px",
+                borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)",
+                background: "#1a1a1a", color: "white", fontSize: "13px",
+                outline: "none", boxSizing: "border-box",
+              }}
+            />
+
             <div style={{ maxHeight: "320px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px", marginBottom: "16px" }}>
-              {players.map(p => {
+              {filteredPlayers.length === 0 && (
+                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "13px", textAlign: "center", padding: "20px 0" }}>
+                  Aucun résultat
+                </div>
+              )}
+              {filteredPlayers.map(p => {
                 const color = TIER_COLORS[p.rankTier] ?? "rgba(255,255,255,0.3)";
                 const selected = selectedPlayerId === p.id;
                 return (
@@ -408,7 +435,7 @@ export default function AccountPage() {
             </div>
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
               <button
-                onClick={() => { setShowPicker(false); setSelectedPlayerId(null); }}
+                onClick={() => { setShowPicker(false); setSelectedPlayerId(null); setPlayerSearch(""); }}
                 style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "rgba(255,255,255,0.4)", fontSize: "13px", cursor: "pointer" }}
               >
                 Annuler
