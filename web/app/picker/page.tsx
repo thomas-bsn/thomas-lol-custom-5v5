@@ -22,14 +22,17 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> 
 };
 
 function RankBadge({ tier, division }: { tier?: string; division?: number | null }) {
-  const t = (tier ?? "IRON").toUpperCase();
-  const colors = TIER_COLORS[t] ?? TIER_COLORS.IRON;
-  const isMasterPlus = t === "MASTER" || t === "GRANDMASTER" || t === "CHALLENGER";
-  const label = isMasterPlus
-    ? t.charAt(0) + t.slice(1).toLowerCase()
-    : division
-      ? `${t.charAt(0) + t.slice(1).toLowerCase()} ${division}`
-      : t.charAt(0) + t.slice(1).toLowerCase();
+  const t = (tier ?? "UNRANKED").toUpperCase();
+  const colors = TIER_COLORS[t] ?? { bg: "rgba(255,255,255,0.05)", text: "rgba(255,255,255,0.3)", border: "rgba(255,255,255,0.1)" };
+  const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(t);
+  const label = t === "UNRANKED"
+    ? "Unranked"
+    : isMasterPlus
+      ? t.charAt(0) + t.slice(1).toLowerCase()
+      : division
+        ? `${t.charAt(0) + t.slice(1).toLowerCase()} ${division}`
+        : t.charAt(0) + t.slice(1).toLowerCase();
+
   return (
     <span style={{
       background: colors.bg,

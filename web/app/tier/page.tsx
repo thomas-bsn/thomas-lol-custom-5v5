@@ -5,34 +5,63 @@ import { useEffect, useMemo, useState } from "react";
 type Player = {
   prenom: string
   riotId: string
-  rankTier: string
+  rankTier: string | null
   rankDivision: number | null
   lp: number | null
+  peakTier: string | null
+  peakDivision: number | null
+  peakLp: number | null
+  peakSeason: string | null
 }
 
 const TIERS = [
   "CHALLENGER", "GRANDMASTER", "MASTER", "DIAMOND",
-  "EMERALD", "PLATINUM", "GOLD", "SILVER", "BRONZE", "IRON"
+  "EMERALD", "PLATINUM", "GOLD", "SILVER", "BRONZE", "IRON", "UNRANKED"
 ] as const;
 
 const TIER_COLORS: Record<string, { text: string; bg: string; border: string }> = {
-  CHALLENGER:  { text: "#FFD700", bg: "rgba(255,215,0,0.08)",  border: "rgba(255,215,0,0.2)" },
-  GRANDMASTER: { text: "#FF5050", bg: "rgba(255,80,80,0.08)",  border: "rgba(255,80,80,0.2)" },
-  MASTER:      { text: "#B450FF", bg: "rgba(180,80,255,0.08)", border: "rgba(180,80,255,0.2)" },
-  DIAMOND:     { text: "#50B4FF", bg: "rgba(80,180,255,0.08)", border: "rgba(80,180,255,0.2)" },
-  EMERALD:     { text: "#50DC8C", bg: "rgba(80,220,140,0.08)", border: "rgba(80,220,140,0.2)" },
-  PLATINUM:    { text: "#50C8B4", bg: "rgba(80,200,180,0.08)", border: "rgba(80,200,180,0.2)" },
-  GOLD:        { text: "#FFB932", bg: "rgba(255,185,50,0.08)", border: "rgba(255,185,50,0.2)" },
-  SILVER:      { text: "#B4BED2", bg: "rgba(180,190,210,0.08)",border: "rgba(180,190,210,0.2)" },
-  BRONZE:      { text: "#B46E3C", bg: "rgba(180,110,60,0.08)", border: "rgba(180,110,60,0.2)" },
-  IRON:        { text: "#78787A", bg: "rgba(120,120,130,0.08)",border: "rgba(120,120,130,0.2)" },
+  CHALLENGER:  { text: "#FFD700", bg: "rgba(255,215,0,0.08)",   border: "rgba(255,215,0,0.2)" },
+  GRANDMASTER: { text: "#FF5050", bg: "rgba(255,80,80,0.08)",   border: "rgba(255,80,80,0.2)" },
+  MASTER:      { text: "#B450FF", bg: "rgba(180,80,255,0.08)",  border: "rgba(180,80,255,0.2)" },
+  DIAMOND:     { text: "#50B4FF", bg: "rgba(80,180,255,0.08)",  border: "rgba(80,180,255,0.2)" },
+  EMERALD:     { text: "#50DC8C", bg: "rgba(80,220,140,0.08)",  border: "rgba(80,220,140,0.2)" },
+  PLATINUM:    { text: "#50C8B4", bg: "rgba(80,200,180,0.08)",  border: "rgba(80,200,180,0.2)" },
+  GOLD:        { text: "#FFB932", bg: "rgba(255,185,50,0.08)",  border: "rgba(255,185,50,0.2)" },
+  SILVER:      { text: "#B4BED2", bg: "rgba(180,190,210,0.08)", border: "rgba(180,190,210,0.2)" },
+  BRONZE:      { text: "#B46E3C", bg: "rgba(180,110,60,0.08)",  border: "rgba(180,110,60,0.2)" },
+  IRON:        { text: "#78787A", bg: "rgba(120,120,130,0.08)", border: "rgba(120,120,130,0.2)" },
+  UNRANKED:    { text: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.08)" },
 };
 
-function getRankLabel(p: Player) {
-  const isMasterPlus = p.rankTier === "MASTER" || p.rankTier === "GRANDMASTER" || p.rankTier === "CHALLENGER";
-  const tierLabel = p.rankTier.charAt(0) + p.rankTier.slice(1).toLowerCase();
-  if (isMasterPlus) return `${tierLabel} — ${p.lp ?? 0} LP`;
-  return `${tierLabel} ${p.rankDivision ?? ""} — ${p.lp ?? 0} LP`;
+const DIVISIONS_LABEL = ["I", "II", "III", "IV"];
+
+const TIER_ORDER: Record<string, number> = {
+  IRON: 0, BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4,
+  EMERALD: 5, DIAMOND: 6, MASTER: 7, GRANDMASTER: 8, CHALLENGER: 9
+};
+
+function getDisplayRank(p: Player) {
+  const hasCurrentRank = p.rankTier && p.rankTier !== "UNRANKED";
+  const hasPeak = !!p.peakTier;
+
+  if (hasCurrentRank && hasPeak) {
+    const currentOrder = TIER_ORDER[p.rankTier!] ?? -1;
+    const peakOrder = TIER_ORDER[p.peakTier!] ?? -1;
+    if (peakOrder > currentOrder) return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: true };
+    return { tier: p.rankTier!, division: p.rankDivision, lp: p.lp, isPeak: false };
+  }
+  if (hasCurrentRank) return { tier: p.rankTier!, division: p.rankDivision, lp: p.lp, isPeak: false };
+  if (hasPeak) return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: p.peakTier !== "UNRANKED" };
+  // Ni rank actuel ni peak → UNRANKED
+  return { tier: "UNRANKED", division: null, lp: null, isPeak: false };
+}
+
+function getRankLabel(tier: string, division: number | null, lp: number | null) {
+  const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(tier);
+  const tierLabel = tier.charAt(0) + tier.slice(1).toLowerCase();
+  if (isMasterPlus) return `${tierLabel} — ${lp ?? 0} LP`;
+  const divLabel = division != null ? DIVISIONS_LABEL[division - 1] : "";
+  return `${tierLabel} ${divLabel} — ${lp ?? 0} LP`;
 }
 
 export default function TierPage() {
@@ -48,18 +77,26 @@ export default function TierPage() {
   const playersByTier = useMemo(() => {
     const map: Record<string, Player[]> = {}
     for (const tier of TIERS) map[tier] = []
-    for (const p of players) { if (map[p.rankTier]) map[p.rankTier].push(p); }
+
+    for (const p of players) {
+      const display = getDisplayRank(p);
+      if (display && map[display.tier]) map[display.tier].push(p);
+    }
+
     for (const tier of TIERS) {
       map[tier].sort((a, b) => {
-        if (a.rankDivision === null && b.rankDivision === null) return (b.lp ?? 0) - (a.lp ?? 0);
-        const divA = a.rankDivision ?? 999;
-        const divB = b.rankDivision ?? 999;
+        const dA = getDisplayRank(a);
+        const dB = getDisplayRank(b);
+        const divA = dA?.division ?? 999;
+        const divB = dB?.division ?? 999;
         if (divA !== divB) return divA - divB;
-        return (b.lp ?? 0) - (a.lp ?? 0);
+        return (dB?.lp ?? 0) - (dA?.lp ?? 0);
       });
     }
     return map;
   }, [players])
+
+  const totalPlayers = useMemo(() => players.filter(p => getDisplayRank(p) !== null).length, [players])
 
   if (loading) {
     return <div style={{ padding: "32px", color: "rgba(255,255,255,0.4)" }}>Chargement…</div>
@@ -74,7 +111,7 @@ export default function TierPage() {
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "white", margin: 0 }}>Tier List</h1>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.82rem", marginTop: "4px" }}>Classement des joueurs par rang</p>
         </div>
-        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "13px" }}>{players.length} joueurs</span>
+        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "13px" }}>{totalPlayers} joueurs</span>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -108,32 +145,56 @@ export default function TierPage() {
 
               {/* Cards */}
               <div style={{ padding: "14px 16px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                {list.map(p => (
-                  <div key={p.riotId} style={{
-                    width: "220px",
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "10px",
-                    padding: "12px 14px",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                      <img src={`/rank_icons/${p.rankTier.toLowerCase()}.svg`} style={{ width: "20px", height: "20px", flexShrink: 0 }} />
-                      <span style={{ color: "white", fontWeight: 600, fontSize: "14px" }}>{p.prenom}</span>
-                    </div>
-                    <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", marginBottom: "6px" }}>{p.riotId}</div>
-                    <div style={{
-                      color: colors.text,
-                      fontSize: "11px", fontWeight: 600,
-                      background: colors.bg,
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "5px",
-                      padding: "2px 8px",
-                      display: "inline-block",
+                {list.map(p => {
+                  const display = getDisplayRank(p)!;
+                  const displayColors = TIER_COLORS[display.tier];
+
+                  return (
+                    <div key={p.riotId} style={{
+                      width: "220px",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      borderRadius: "10px",
+                      padding: "12px 14px",
                     }}>
-                      {getRankLabel(p)}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                        <img src={`/rank_icons/${display.tier.toLowerCase()}.svg`} style={{ width: "20px", height: "20px", flexShrink: 0 }} />
+                        <span style={{ color: "white", fontWeight: 600, fontSize: "14px", flex: 1 }}>{p.prenom}</span>
+                        {display.isPeak && (
+                          <span style={{
+                            fontSize: "9px", fontWeight: 700,
+                            color: "rgba(255,185,50,0.9)",
+                            background: "rgba(255,185,50,0.1)",
+                            border: "1px solid rgba(255,185,50,0.25)",
+                            borderRadius: "4px",
+                            padding: "2px 5px",
+                            letterSpacing: "0.04em",
+                            flexShrink: 0,
+                          }}>
+                            PEAK ELO
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", marginBottom: "6px" }}>{p.riotId}</div>
+                      <div style={{
+                        color: displayColors.text,
+                        fontSize: "11px", fontWeight: 600,
+                        background: displayColors.bg,
+                        border: `1px solid ${displayColors.border}`,
+                        borderRadius: "5px",
+                        padding: "2px 8px",
+                        display: "inline-block",
+                      }}>
+                        {getRankLabel(display.tier, display.division, display.lp)}
+                        {display.isPeak && p.peakSeason && (
+                          <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400, marginLeft: "4px" }}>
+                            — {p.peakSeason}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );

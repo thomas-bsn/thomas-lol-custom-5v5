@@ -1,4 +1,5 @@
 export const RANK_SCORE: Record<string, number> = {
+  UNRANKED: 0,
   IRON: 800,
   BRONZE: 1000,
   SILVER: 1200,
