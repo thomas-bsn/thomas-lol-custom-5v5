@@ -1,53 +1,58 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import ClientBootReset from "./ClientBootReset";
 import HelpTournamentButton from "./HelpTournamentButton";
+import VideoBackground from "./VideoBackground";
+import CinemaButton from "./CinemaButton";
 import Sidebar from "./Sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "THOMAS - LOL TOURNAMENT",
+  title: "THOMA$ - LoL Tournament",
   description: "A simple app to manage League of Legends tournaments.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body>
+      <body className={geist.variable} style={{ margin: 0, background: "#000", fontFamily: "var(--font-geist), sans-serif" }}>
         <ClientBootReset />
         <HelpTournamentButton />
+        <CinemaButton />
 
         {/* Background vidéo */}
         <div className="video-bg">
-          <video autoPlay loop muted playsInline preload="auto">
-            <source src="/bg.mp4" type="video/mp4" />
-          </video>
+          <VideoBackground />
           <div className="video-overlay" />
         </div>
 
-        {/* Shell = sidebar + contenu */}
-        <div className="shell">
+        {/* Shell */}
+        <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", display: "flex" }}>
           <Sidebar />
 
-          <div className="content">
-            <div className="content-inner">
-              <header className="app-header">
-                <h1 className="app-title">THOMA$ - LoL Tournamement</h1>
-                <p className="app-subtitle">samy</p>
-              </header>
+          <div style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
 
-              <main>{children}</main>
+            {/* Header compact */}
+            <header style={{
+              padding: "20px 48px 0",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              marginBottom: "28px",
+            }}>
+              <div>
+                <span style={{ color: "white", fontWeight: 800, fontSize: "18px", letterSpacing: "-0.01em" }}>THOMA$</span>
+                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "14px", marginLeft: "8px" }}>LoL Tournament</span>
+              </div>
+            </header>
+
+            <div style={{ padding: "0" }}>
+              {children}
             </div>
+
           </div>
         </div>
       </body>

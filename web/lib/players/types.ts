@@ -1,6 +1,7 @@
 export type DBPlayer = {
   prenom: string
-  riotid: string
+  riotId: string
   rankTier?: string
   rankDivision?: number | null
+  lp?: number | null
 }

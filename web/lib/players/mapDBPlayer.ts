@@ -2,14 +2,28 @@ import { Player } from "@/lib/appState"
 import { RANK_SCORE } from "@/lib/rankScore"
 import { DBPlayer } from "./types"
 
-export function mapDBPlayer(p: DBPlayer): Player {
+const DIVISION_BONUS: Record<number, number> = {
+  1: 75,
+  2: 50,
+  3: 25,
+  4: 0,
+}
 
-  const tier = p.rankTier ?? "Gold"
-  const division = p.rankDivision ? ` ${p.rankDivision}` : ""
+export function mapDBPlayer(p: DBPlayer): Player {
+  const tier = (p.rankTier ?? "GOLD").toUpperCase()
+  const base = RANK_SCORE[tier] ?? 1500
+
+  let mmr = base
+
+  if (tier === "MASTER" || tier === "GRANDMASTER" || tier === "CHALLENGER") {
+    mmr = base + (p.lp ?? 0)
+  } else if (p.rankDivision) {
+    mmr = base + (DIVISION_BONUS[p.rankDivision] ?? 0)
+  }
 
   return {
     prenom: p.prenom,
-    rank: `${tier}${division}`,
-    mmr: RANK_SCORE[tier] ?? 1500
+    rank: tier + (p.rankDivision ? ` ${p.rankDivision}` : ""),
+    mmr
   }
 }
