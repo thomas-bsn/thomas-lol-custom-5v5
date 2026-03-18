@@ -65,10 +65,16 @@ export default function AccountPage() {
     // Récupère le player lié
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/players/me`, {
       headers: { Authorization: `Bearer ${jwt}` }
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setLinkedPlayer(data); })
-      .catch(() => {});
+      })
+        .then(r => {
+          if (r.status === 401) {
+            logout(); // JWT expiré → déconnexion auto
+            return null;
+          }
+          return r.ok ? r.json() : null;
+        })
+        .then(data => { if (data) setLinkedPlayer(data); })
+        .catch(() => {});
 
     // Récupère tous les players pour le sélecteur
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/players`)
@@ -109,6 +115,7 @@ export default function AccountPage() {
     localStorage.removeItem("jwt");
     localStorage.removeItem("discord_username");
     localStorage.removeItem("discord_avatar");
+    window.dispatchEvent(new Event("auth-change"));
     router.push("/");
   }
 

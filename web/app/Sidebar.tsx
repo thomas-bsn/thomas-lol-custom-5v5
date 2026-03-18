@@ -15,9 +15,16 @@ export default function Sidebar() {
   const [user, setUser] = useState<{ username: string; avatar: string } | null>(null);
 
   useEffect(() => {
-    const username = localStorage.getItem("discord_username");
-    const avatar = localStorage.getItem("discord_avatar");
-    if (username) setUser({ username, avatar: avatar ?? "" });
+    function syncAuth() {
+      const username = localStorage.getItem("discord_username");
+      const avatar = localStorage.getItem("discord_avatar");
+      if (username) setUser({ username, avatar: avatar ?? "" });
+      else setUser(null);
+    }
+
+    syncAuth();
+    window.addEventListener("auth-change", syncAuth);
+    return () => window.removeEventListener("auth-change", syncAuth);
   }, []);
 
   function logout() {
@@ -25,6 +32,7 @@ export default function Sidebar() {
     localStorage.removeItem("discord_username");
     localStorage.removeItem("discord_avatar");
     setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
     router.push("/");
   }
 

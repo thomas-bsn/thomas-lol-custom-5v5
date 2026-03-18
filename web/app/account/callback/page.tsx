@@ -16,6 +16,7 @@ function CallbackHandler() {
       localStorage.setItem("jwt", token);
       localStorage.setItem("discord_username", username ?? "");
       localStorage.setItem("discord_avatar", avatarUrl ?? "");
+      window.dispatchEvent(new Event("auth-change"));
     }
 
     router.replace("/account");
