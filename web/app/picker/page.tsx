@@ -103,7 +103,7 @@ export default function SetupPage() {
     setIsCreating(true);
     setError(null);
     try {
-      const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/players", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/players`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prenom: newPrenom.trim(), riotId: newRiotId.trim() }),

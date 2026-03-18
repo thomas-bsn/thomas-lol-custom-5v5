@@ -93,7 +93,7 @@ export default function Sidebar() {
           </div>
         ) : (
           // Non connecté
-          <a href="${process.env.NEXT_PUBLIC_API_URL}/auth/discord/login" style={{
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/auth/discord/login`} style={{
             display: "flex", alignItems: "center", gap: "8px",
             padding: "9px 12px", borderRadius: "9px", textDecoration: "none",
             background: "rgba(88,101,242,0.15)",
