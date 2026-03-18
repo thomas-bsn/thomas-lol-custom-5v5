@@ -63,7 +63,7 @@ export default function AccountPage() {
     setUser({ username, avatar: avatar ?? "" });
 
     // Récupère le player lié
-    fetch("http://localhost:5221/players/me", {
+    fetch("${process.env.NEXT_PUBLIC_API_URL}/players/me", {
       headers: { Authorization: `Bearer ${jwt}` }
     })
       .then(r => r.ok ? r.json() : null)
@@ -71,7 +71,7 @@ export default function AccountPage() {
       .catch(() => {});
 
     // Récupère tous les players pour le sélecteur
-    fetch("http://localhost:5221/players")
+    fetch("${process.env.NEXT_PUBLIC_API_URL}/players")
       .then(r => r.json())
       .then(setPlayers)
       .catch(() => {});
@@ -85,7 +85,7 @@ export default function AccountPage() {
     setLinking(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5221/players/link", {
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/players/link", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ playerId: selectedPlayerId }),

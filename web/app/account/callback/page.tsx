@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AccountCallbackPage() {
+function CallbackHandler() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -21,9 +21,13 @@ export default function AccountCallbackPage() {
     router.replace("/account");
   }, []);
 
+  return <div style={{ padding: "24px", color: "white" }}>Connexion en cours…</div>;
+}
+
+export default function AccountCallbackPage() {
   return (
-    <main style={{ padding: "24px", color: "white" }}>
-      Connexion en cours…
-    </main>
+    <Suspense fallback={<div style={{ padding: "24px", color: "white" }}>Chargement…</div>}>
+      <CallbackHandler />
+    </Suspense>
   );
 }

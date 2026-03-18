@@ -40,7 +40,7 @@ export default function TierPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("http://localhost:5221/players")
+    fetch("${process.env.NEXT_PUBLIC_API_URL}/players")
       .then(r => r.json())
       .then(data => { setPlayers(data); setLoading(false); })
   }, [])
