@@ -61,7 +61,11 @@ export default function TeamsPage() {
   const diffInfo = diffLabel(diff);
   const stronger = score1 > score2 ? 1 : score2 > score1 ? 2 : 0;
 
-  function validate() {
+  function goToSides() {
+    router.push("/sides");
+  }
+
+  function launchDirect() {
     if (!state) return;
     const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
     update({ ...state, game: { status: "running", code: fakeCode } });
@@ -127,11 +131,14 @@ export default function TeamsPage() {
         </span>
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button onClick={validate} style={{ padding: "11px 24px", borderRadius: "9px", border: "none", background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
-          Lancer la game →
+      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <button onClick={goToSides} style={{ padding: "11px 24px", borderRadius: "9px", border: "none", background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
+          Choisir les sides →
         </button>
-        <button onClick={backAndReset} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", fontSize: "14px", cursor: "pointer" }}>
+        <button onClick={launchDirect} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", fontSize: "14px", cursor: "pointer" }}>
+          Lancer sans sides
+        </button>
+        <button onClick={backAndReset} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.06)", background: "transparent", color: "rgba(255,255,255,0.25)", fontSize: "14px", cursor: "pointer" }}>
           Retour
         </button>
       </div>
