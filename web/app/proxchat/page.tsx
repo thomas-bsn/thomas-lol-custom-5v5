@@ -124,14 +124,14 @@ export default function ProximityTutoPage() {
           display: grid;
           grid-template-columns: 280px 1fr;
           gap: 16px;
-          max-width: 40%;
+          max-width: 900px;
           width: 100%;
         }
         .bottom-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
-          width: 40%;
+          width: 100%;
           margin-top: 16px;
         }
         @media (max-width: 800px) {
@@ -214,7 +214,7 @@ export default function ProximityTutoPage() {
         </div>
 
         {/* Preview */}
-        <div style={{ borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.35)", aspectRatio: "16/10", display: "flex", alignItems: "center", justifyContent: "center", position: "sticky", top: "20px" }}>
+        <div style={{ borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.35)", minHeight: "300px", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", position: "sticky", top: "20px" }}>
 
           {step.imgWide ? (
             <div style={{ width: "100%", height: "100%", position: "relative" }}>
