@@ -28,7 +28,7 @@ const steps = [
   {
     num: "04",
     title: "Calibrer la minimap",
-    desc: <>Clique sur <strong>Calibration</strong>, règle le rectangle rouge sur ta minimap en jeu. Une seule fois par résolution d'écran.</>,
+    desc: <>Clique sur <strong>Calibration</strong>, règle le rectangle rouge PARFAITEMENT sur ta minimap en jeu. Une seule fois par résolution d'écran.</>,
     img: "/proxchat/4.png",
     imgWide: "/proxchat/4-wide.png",
   },
