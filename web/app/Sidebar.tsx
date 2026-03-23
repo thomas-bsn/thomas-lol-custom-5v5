@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 const items = [
   { href: "/picker", label: "Picker", icon: "⚔️" },
   { href: "/tier", label: "Tier List", icon: "🏆" },
+  { href: "/proxchat", label: "Proximity Chat", icon: "🎙️" },
 ];
 
 export default function Sidebar() {
