@@ -159,7 +159,7 @@ export default function ProximityTutoPage() {
             LoL Proximity Voice Chat
           </h1>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", marginTop: "5px" }}>
-            Entendez mehdi hurlez en lane parce qu'il loupe un sbire canon.
+            Entendez Mehdi hurler en lane parce qu’il loupe un sbire canon.
           </p>
         </div>
         <button onClick={() => router.back()} style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.07)", background: "transparent", color: "rgba(255,255,255,0.3)", fontSize: "12px", cursor: "pointer", marginTop: "8px", flexShrink: 0, marginLeft: "16px" }}>
