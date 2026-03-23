@@ -20,17 +20,17 @@ const steps = [
   },
   {
     num: "03",
-    title: "Calibrer la minimap",
-    desc: <>Clique sur <strong>Calibration</strong>, règle le rectangle rouge sur ta minimap en jeu. Une seule fois par résolution d'écran.</>,
+    title: "Rejoindre un vocal Discord",
+    desc: <>Tous les joueurs rejoignent le <strong>même channel vocal Discord</strong> avant la game. Le logiciel détecte automatiquement.</>,
     img: "/proxchat/3.png",
-    imgWide: "/proxchat/3-wide.png",
+    imgWide: null,
   },
   {
     num: "04",
-    title: "Rejoindre un vocal Discord",
-    desc: <>Tous les joueurs rejoignent le <strong>même channel vocal Discord</strong> avant la game. Le logiciel détecte automatiquement.</>,
+    title: "Calibrer la minimap",
+    desc: <>Clique sur <strong>Calibration</strong>, règle le rectangle rouge sur ta minimap en jeu. Une seule fois par résolution d'écran.</>,
     img: "/proxchat/4.png",
-    imgWide: null,
+    imgWide: "/proxchat/4-wide.png",
   },
   {
     num: "05",
