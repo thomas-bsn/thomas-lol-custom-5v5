@@ -3,20 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 
 type Player = {
-  prenom: string
-  riotId: string
-  rankTier: string | null
-  rankDivision: number | null
-  lp: number | null
-  peakTier: string | null
-  peakDivision: number | null
-  peakLp: number | null
-  peakSeason: string | null
-}
+  prenom: string;
+  riotId: string;
+  rankTier: string | null;
+  rankDivision: number | null;
+  lp: number | null;
+  peakTier: string | null;
+  peakDivision: number | null;
+  peakLp: number | null;
+  peakSeason: string | null;
+};
 
 const TIERS = [
   "CHALLENGER", "GRANDMASTER", "MASTER", "DIAMOND",
-  "EMERALD", "PLATINUM", "GOLD", "SILVER", "BRONZE", "IRON", "UNRANKED"
+  "EMERALD", "PLATINUM", "GOLD", "SILVER", "BRONZE", "IRON", "UNRANKED",
 ] as const;
 
 const TIER_COLORS: Record<string, { text: string; bg: string; border: string }> = {
@@ -37,8 +37,31 @@ const DIVISIONS_LABEL = ["I", "II", "III", "IV"];
 
 const TIER_ORDER: Record<string, number> = {
   IRON: 0, BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4,
-  EMERALD: 5, DIAMOND: 6, MASTER: 7, GRANDMASTER: 8, CHALLENGER: 9
+  EMERALD: 5, DIAMOND: 6, MASTER: 7, GRANDMASTER: 8, CHALLENGER: 9,
 };
+
+// Score numérique d'un tier+division+lp pour calculer la moyenne
+// Chaque tier vaut 400 pts, chaque division 100 pts
+function getRankScore(tier: string, division: number | null, lp: number | null): number {
+  const tierScore = (TIER_ORDER[tier] ?? 0) * 400;
+  const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(tier);
+  const divScore = isMasterPlus ? 0 : (4 - (division ?? 4)) * 100;
+  return tierScore + divScore + (lp ?? 0);
+}
+
+// Convertit un score numérique en tier+division+lp
+function scoreToRank(score: number): { tier: string; division: number | null; lp: number } {
+  const tierIndex = Math.min(Math.floor(score / 400), 9);
+  const tierName = Object.keys(TIER_ORDER).find(t => TIER_ORDER[t] === tierIndex) ?? "IRON";
+  const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(tierName);
+  const remainder = score - tierIndex * 400;
+  if (isMasterPlus) {
+    return { tier: tierName, division: null, lp: Math.round(remainder) };
+  }
+  const division = 4 - Math.min(Math.floor(remainder / 100), 3);
+  const lp = Math.round(remainder % 100);
+  return { tier: tierName, division, lp };
+}
 
 function getDisplayRank(p: Player) {
   const hasCurrentRank = p.rankTier && p.rankTier !== "UNRANKED";
@@ -47,12 +70,14 @@ function getDisplayRank(p: Player) {
   if (hasCurrentRank && hasPeak) {
     const currentOrder = TIER_ORDER[p.rankTier!] ?? -1;
     const peakOrder = TIER_ORDER[p.peakTier!] ?? -1;
-    if (peakOrder > currentOrder) return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: true };
+    if (peakOrder > currentOrder)
+      return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: true };
     return { tier: p.rankTier!, division: p.rankDivision, lp: p.lp, isPeak: false };
   }
-  if (hasCurrentRank) return { tier: p.rankTier!, division: p.rankDivision, lp: p.lp, isPeak: false };
-  if (hasPeak) return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: p.peakTier !== "UNRANKED" };
-  // Ni rank actuel ni peak → UNRANKED
+  if (hasCurrentRank)
+    return { tier: p.rankTier!, division: p.rankDivision, lp: p.lp, isPeak: false };
+  if (hasPeak)
+    return { tier: p.peakTier!, division: p.peakDivision, lp: p.peakLp, isPeak: p.peakTier !== "UNRANKED" };
   return { tier: "UNRANKED", division: null, lp: null, isPeak: false };
 }
 
@@ -64,19 +89,79 @@ function getRankLabel(tier: string, division: number | null, lp: number | null) 
   return `${tierLabel} ${divLabel} — ${lp ?? 0} LP`;
 }
 
+// Composant badge rang moyen
+function AverageRankBadge({ players }: { players: Player[] }) {
+  const ranked = players.filter(p => {
+    const d = getDisplayRank(p);
+    return d.tier !== "UNRANKED";
+  });
+
+  if (ranked.length === 0) return null;
+
+  const avgScore = ranked.reduce((sum, p) => {
+    const d = getDisplayRank(p);
+    return sum + getRankScore(d.tier, d.division, d.lp);
+  }, 0) / ranked.length;
+
+  const avg = scoreToRank(avgScore);
+  const colors = TIER_COLORS[avg.tier];
+  const tierLabel = avg.tier.charAt(0) + avg.tier.slice(1).toLowerCase();
+  const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(avg.tier);
+  const divLabel = !isMasterPlus && avg.division != null ? " " + DIVISIONS_LABEL[avg.division - 1] : "";
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      gap: "4px",
+    }}>
+      <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", letterSpacing: "0.04em" }}>
+        RANG MOYEN
+      </span>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        background: colors.bg,
+        border: `1px solid ${colors.border}`,
+        borderRadius: "10px",
+        padding: "7px 12px",
+      }}>
+        <img
+          src={`/rank_icons/${avg.tier.toLowerCase()}.svg`}
+          style={{ width: "22px", height: "22px", flexShrink: 0 }}
+        />
+        <span style={{ color: colors.text, fontWeight: 700, fontSize: "13px" }}>
+          {tierLabel}{divLabel}
+        </span>
+        <span style={{
+          color: "rgba(255,255,255,0.35)",
+          fontSize: "12px",
+          borderLeft: "1px solid rgba(255,255,255,0.1)",
+          paddingLeft: "8px",
+          marginLeft: "2px",
+        }}>
+          {avg.lp} LP
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function TierPage() {
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/players`)
       .then(r => r.json())
-      .then(data => { setPlayers(data); setLoading(false); })
-  }, [])
+      .then(data => { setPlayers(data); setLoading(false); });
+  }, []);
 
   const playersByTier = useMemo(() => {
-    const map: Record<string, Player[]> = {}
-    for (const tier of TIERS) map[tier] = []
+    const map: Record<string, Player[]> = {};
+    for (const tier of TIERS) map[tier] = [];
 
     for (const p of players) {
       const display = getDisplayRank(p);
@@ -94,24 +179,31 @@ export default function TierPage() {
       });
     }
     return map;
-  }, [players])
+  }, [players]);
 
-  const totalPlayers = useMemo(() => players.filter(p => getDisplayRank(p) !== null).length, [players])
+  const totalPlayers = useMemo(
+    () => players.filter(p => getDisplayRank(p) !== null).length,
+    [players]
+  );
 
   if (loading) {
-    return <div style={{ padding: "32px", color: "rgba(255,255,255,0.4)" }}>Chargement…</div>
+    return <div style={{ padding: "32px", color: "rgba(255,255,255,0.4)" }}>Chargement…</div>;
   }
 
   return (
     <div style={{ padding: "0 48px 40px", width: "100%" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "white", margin: 0 }}>Tier List</h1>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.82rem", marginTop: "4px" }}>Classement des joueurs par rang</p>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.82rem", marginTop: "4px", marginBottom: 0 }}>
+            Classement des joueurs par rang
+            <span style={{ marginLeft: "12px", color: "rgba(255,255,255,0.2)" }}>·</span>
+            <span style={{ marginLeft: "12px" }}>{totalPlayers} joueurs</span>
+          </p>
         </div>
-        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "13px" }}>{totalPlayers} joueurs</span>
+        <AverageRankBadge players={players} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -140,7 +232,9 @@ export default function TierPage() {
                     {tier.charAt(0) + tier.slice(1).toLowerCase()}
                   </span>
                 </div>
-                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>{list.length} joueur{list.length > 1 ? "s" : ""}</span>
+                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>
+                  {list.length} joueur{list.length > 1 ? "s" : ""}
+                </span>
               </div>
 
               {/* Cards */}
