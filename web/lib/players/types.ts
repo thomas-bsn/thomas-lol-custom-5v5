@@ -4,4 +4,7 @@ export type DBPlayer = {
   rankTier?: string
   rankDivision?: number | null
   lp?: number | null
+  peakTier?: string | null
+  peakDivision?: number | null
+  peakLp?: number | null
 }

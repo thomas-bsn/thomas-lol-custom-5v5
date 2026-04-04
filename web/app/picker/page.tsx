@@ -7,6 +7,7 @@ import { useAppState } from "@/lib/useAppState";
 import { loadPlayers } from "@/lib/players/loadPlayers";
 import { mapDBPlayer } from "@/lib/players/mapDBPlayer";
 import type { DBPlayer } from "@/lib/players/types";
+import { TIER_ORDER } from "@/lib/tierOrder"
 
 const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   CHALLENGER:  { bg: "rgba(255, 215, 0, 0.15)",  text: "#FFD700", border: "rgba(255,215,0,0.4)" },
@@ -230,7 +231,14 @@ export default function SetupPage() {
                     <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", marginTop: "2px" }}>{p.riotId}</div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <RankBadge tier={p.rankTier} division={p.rankDivision} />
+                    <RankBadge
+                      tier={p.peakTier && TIER_ORDER[p.peakTier?.toUpperCase()] > TIER_ORDER[(p.rankTier ?? "").toUpperCase()]
+                        ? p.peakTier
+                        : p.rankTier}
+                      division={p.peakTier && TIER_ORDER[p.peakTier?.toUpperCase()] > TIER_ORDER[(p.rankTier ?? "").toUpperCase()]
+                        ? p.peakDivision
+                        : p.rankDivision}
+                    />
                     {isSelected
                       ? <span style={{ fontSize: "12px", color: "#50DC8C" }}>✓</span>
                       : <span style={{ fontSize: "18px", color: "rgba(255,255,255,0.2)", lineHeight: 1 }}>+</span>

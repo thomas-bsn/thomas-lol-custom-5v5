@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { TIER_ORDER } from "@/lib/tierOrder"
 
 type Player = {
   prenom: string;
@@ -35,11 +36,6 @@ const TIER_COLORS: Record<string, { text: string; bg: string; border: string }> 
 };
 
 const DIVISIONS_LABEL = ["I", "II", "III", "IV"];
-
-const TIER_ORDER: Record<string, number> = {
-  IRON: 0, BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4,
-  EMERALD: 5, DIAMOND: 6, MASTER: 7, GRANDMASTER: 8, CHALLENGER: 9,
-};
 
 // Score numérique d'un tier+division+lp pour calculer la moyenne
 // Chaque tier vaut 400 pts, chaque division 100 pts
