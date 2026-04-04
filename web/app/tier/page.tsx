@@ -11,6 +11,7 @@ type Player = {
   peakTier: string | null;
   peakDivision: number | null;
   peakLp: number | null;
+  mainRole: string | null;
   peakSeason: string | null;
 };
 
@@ -254,6 +255,13 @@ export default function TierPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
                         <img src={`/rank_icons/${display.tier.toLowerCase()}.svg`} style={{ width: "20px", height: "20px", flexShrink: 0 }} />
                         <span style={{ color: "white", fontWeight: 600, fontSize: "14px", flex: 1 }}>{p.prenom}</span>
+                        {p.mainRole && (
+                          <img
+                            src={`/role_icons/roleicon_${p.mainRole.toLowerCase()}.png`}
+                            style={{ width: "16px", height: "16px", flexShrink: 0, opacity: 0.7 }}
+                            title={p.mainRole}
+                          />
+                        )}
                         {display.isPeak && (
                           <span style={{
                             fontSize: "9px", fontWeight: 700,
