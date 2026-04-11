@@ -6,6 +6,7 @@ import HelpTournamentButton from "./HelpTournamentButton";
 import VideoBackground from "./VideoBackground";
 import CinemaButton from "./CinemaButton";
 import Sidebar from "./Sidebar";
+import AuthValidator from "@/components/AuthValidator"; // ✅ AJOUT
 
 const geist = Geist({
   variable: "--font-geist",
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body className={geist.variable} style={{ margin: 0, background: "#000", fontFamily: "var(--font-geist), sans-serif" }}>
+        <AuthValidator /> {/* ✅ AJOUT */}
         <ClientBootReset />
         <HelpTournamentButton />
         <CinemaButton />
