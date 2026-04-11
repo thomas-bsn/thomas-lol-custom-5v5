@@ -1,6 +1,7 @@
 export type Mode = "roulette" | "draft" | "balanced";
 
 export type Player = {
+  id: number;
   prenom: string;
   rank: string;
   mmr: number;
@@ -41,9 +42,15 @@ export type Session =
   | { type: "draft"; data: DraftSession }
   | { type: "balanced"; data: BalancedSession };
 
+export type GameTeams = {
+  blue: Player[];
+  red: Player[];
+};
+
 export type GameState = {
   status: "wip" | "running" | "ended";
   code?: string;
+  teams?: GameTeams;
 };
 
 export type AppState = {

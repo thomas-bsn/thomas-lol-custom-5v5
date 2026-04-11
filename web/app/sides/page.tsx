@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { GameTeams } from "@/lib/appState";
 import { useAppState } from "@/lib/useAppState";
+import { launchGame } from "@/lib/game/launchGame";
+
 
 type Face = "pile" | "face";
 type CoinState = "idle" | "flipping" | "done";
+type Side = "blue" | "red";
 
 function Coin({ state, result }: { state: CoinState; result: Face | null }) {
-  const won = result !== null;
   return (
     <div style={{ perspective: "400px", width: "96px", height: "96px" }}>
       <style>{`
@@ -66,6 +69,7 @@ export default function SidesPage() {
   const [coinState, setCoinState] = useState<CoinState>("idle");
   const [coinResult, setCoinResult] = useState<Face | null>(null);
   const [won, setWon] = useState<boolean | null>(null);
+  const [chosenSide, setChosenSide] = useState<Side | null>(null);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -80,6 +84,7 @@ export default function SidesPage() {
     setCoinState("flipping");
     setCoinResult(null);
     setWon(null);
+    setChosenSide(null);
     setTimeout(() => {
       const result: Face = Math.random() < 0.5 ? "pile" : "face";
       setCoinResult(result);
@@ -94,17 +99,20 @@ export default function SidesPage() {
     setCoinState("idle");
     setCoinResult(null);
     setWon(null);
+    setChosenSide(null);
   }
 
-  function launch() {
-    if (!state) return;
-    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
-    update({ ...state, game: { status: "running", code: fakeCode } });
-    router.push("/game");
+  function launch(side: Side) {
+    if (!state?.result) return;
+    const teams: GameTeams = side === "blue"
+      ? { blue: sideChooser === 1 ? state.result.team1 : state.result.team2, red: sideChooser === 1 ? state.result.team2 : state.result.team1 }
+      : { red: sideChooser === 1 ? state.result.team1 : state.result.team2, blue: sideChooser === 1 ? state.result.team2 : state.result.team1 };
+    launchGame(state, teams, update, router);
   }
 
-  const tName = (n: 1 | 2) => n === 1 ? "Team A" : "Team B";
+  const tName = (n: 1 | 2) => n === 1 ? "Team Blue" : "Team Red";
   const loser = callerTeam === 1 ? 2 : 1;
+  const sideChooser = won ? callerTeam! : loser as 1 | 2;
 
   return (
     <main style={{ padding: "0 48px 40px", width: "100%" }}>
@@ -125,11 +133,17 @@ export default function SidesPage() {
           </p>
           <div style={{ display: "flex", gap: "8px" }}>
             {([1, 2] as const).map(n => (
-              <button key={n} onClick={() => { setCallerTeam(n); setCallerCall(null); setCoinState("idle"); setCoinResult(null); setWon(null); }} style={{
+              <button key={n} onClick={() => { setCallerTeam(n); setCallerCall(null); setCoinState("idle"); setCoinResult(null); setWon(null); setChosenSide(null); }} style={{
                 flex: 1, padding: "13px 0", borderRadius: "9px", cursor: "pointer",
-                border: callerTeam === n ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.1)",
-                background: callerTeam === n ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
-                color: callerTeam === n ? "white" : "rgba(255,255,255,0.4)",
+                border: callerTeam === n
+                  ? `1px solid ${n === 1 ? "rgba(80,180,255,0.6)" : "rgba(255,80,80,0.6)"}`
+                  : "1px solid rgba(255,255,255,0.1)",
+                background: callerTeam === n
+                  ? n === 1 ? "rgba(80,180,255,0.1)" : "rgba(255,80,80,0.1)"
+                  : "rgba(255,255,255,0.03)",
+                color: callerTeam === n
+                  ? n === 1 ? "#50B4FF" : "#FF5050"
+                  : "rgba(255,255,255,0.4)",
                 fontWeight: 700, fontSize: "14px", transition: "all 0.15s",
               }}>
                 {tName(n)}
@@ -146,7 +160,7 @@ export default function SidesPage() {
             </p>
             <div style={{ display: "flex", gap: "8px" }}>
               {(["pile", "face"] as Face[]).map(f => (
-                <button key={f} onClick={() => { setCallerCall(f); setCoinState("idle"); setCoinResult(null); setWon(null); }} style={{
+                <button key={f} onClick={() => { setCallerCall(f); setCoinState("idle"); setCoinResult(null); setWon(null); setChosenSide(null); }} style={{
                   flex: 1, padding: "13px 0", borderRadius: "9px", cursor: "pointer",
                   border: callerCall === f ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.1)",
                   background: callerCall === f ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
@@ -197,26 +211,59 @@ export default function SidesPage() {
                   <p style={{ margin: 0, fontWeight: 700, fontSize: "15px", color: won ? "#50DC8C" : "#FF5050" }}>
                     {won
                       ? `${tName(callerTeam!)} a gagné — choisissez votre side !`
-                      : `${tName(callerTeam!)} a perdu — c'est ${tName(loser as 1|2)} qui choisit le side`
+                      : `${tName(callerTeam!)} a perdu — c'est ${tName(loser as 1 | 2)} qui choisit le side`
                     }
                   </p>
                 </div>
 
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={launch} style={{
-                    padding: "11px 22px", borderRadius: "9px", border: "none",
-                    background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer",
-                  }}>
-                    Lancer la game →
-                  </button>
-                  <button onClick={reset} style={{
-                    padding: "11px 16px", borderRadius: "9px",
-                    border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)",
-                    color: "rgba(255,255,255,0.4)", fontSize: "13px", cursor: "pointer",
-                  }}>
-                    Rejouer
-                  </button>
-                </div>
+                {/* Side choice */}
+                {!chosenSide ? (
+                  <>
+                    <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+                      {tName(sideChooser)} choisit son side
+                    </p>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      {(["blue", "red"] as Side[]).map(side => (
+                        <button key={side} onClick={() => setChosenSide(side)} style={{
+                          flex: 1, padding: "13px 0", borderRadius: "9px", cursor: "pointer",
+                          border: `1px solid ${side === "blue" ? "rgba(80,180,255,0.4)" : "rgba(255,80,80,0.4)"}`,
+                          background: side === "blue" ? "rgba(80,180,255,0.1)" : "rgba(255,80,80,0.1)",
+                          color: side === "blue" ? "#50B4FF" : "#FF5050",
+                          fontWeight: 700, fontSize: "14px", textTransform: "capitalize", transition: "all 0.15s",
+                        }}>
+                          {side === "blue" ? "Blue side" : "Red side"}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      padding: "12px 16px", borderRadius: "9px",
+                      background: chosenSide === "blue" ? "rgba(80,180,255,0.08)" : "rgba(255,80,80,0.08)",
+                      border: `1px solid ${chosenSide === "blue" ? "rgba(80,180,255,0.3)" : "rgba(255,80,80,0.3)"}`,
+                    }}>
+                      <p style={{ margin: 0, fontWeight: 700, fontSize: "14px", color: chosenSide === "blue" ? "#50B4FF" : "#FF5050" }}>
+                        {tName(sideChooser)} joue {chosenSide === "blue" ? "Blue side" : "Red side"}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => launch(chosenSide)} style={{
+                        padding: "11px 22px", borderRadius: "9px", border: "none",
+                        background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer",
+                      }}>
+                        Lancer la game →
+                      </button>
+                      <button onClick={reset} style={{
+                        padding: "11px 16px", borderRadius: "9px",
+                        border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)",
+                        color: "rgba(255,255,255,0.4)", fontSize: "13px", cursor: "pointer",
+                      }}>
+                        Rejouer
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

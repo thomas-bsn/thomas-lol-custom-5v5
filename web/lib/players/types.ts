@@ -1,4 +1,5 @@
 export type DBPlayer = {
+  id: number
   prenom: string
   riotId: string
   rankTier?: string

@@ -6,7 +6,8 @@ import HelpTournamentButton from "./HelpTournamentButton";
 import VideoBackground from "./VideoBackground";
 import CinemaButton from "./CinemaButton";
 import Sidebar from "./Sidebar";
-import AuthValidator from "@/components/AuthValidator"; // ✅ AJOUT
+import AuthValidator from "@/components/AuthValidator"; 
+
 
 const geist = Geist({
   variable: "--font-geist",

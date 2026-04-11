@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/useAppState";
 import { createDraftSession, createRouletteSession, Player } from "@/lib/appState";
 import { teamScore, diffLabel } from "@/lib/draft/draftUtils";
+import { launchGame } from "@/lib/game/launchGame";
+
 
 const TIER_COLORS: Record<string, string> = {
   CHALLENGER:  "#FFD700",
@@ -62,14 +64,20 @@ export default function TeamsPage() {
   const stronger = score1 > score2 ? 1 : score2 > score1 ? 2 : 0;
 
   function goToSides() {
+    if (!state?.result) return;
+    // set default avant d'aller sur /sides
+    update({ ...state, game: { status: "wip", teams: { blue: state.result.team1, red: state.result.team2 } } });
     router.push("/sides");
   }
 
   function launchDirect() {
-    if (!state) return;
-    const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();
-    update({ ...state, game: { status: "running", code: fakeCode } });
-    router.push("/game");
+    if (!state?.result) return;
+    launchGame(
+      state,
+      { blue: state.result.team1, red: state.result.team2 },
+      update,
+      router
+    );
   }
 
   function backAndReset() {
@@ -93,8 +101,8 @@ export default function TeamsPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
         {([
-          { team: team1 as Player[], score: score1, label: "Team A", accent: "80,180,255", num: 1 },
-          { team: team2 as Player[], score: score2, label: "Team B", accent: "255,80,80", num: 2 },
+          { team: team1 as Player[], score: score1, label: "Team Blue", accent: "80,180,255", num: 1 },
+          { team: team2 as Player[], score: score2, label: "Team  Red", accent: "255,80,80", num: 2 },
         ]).map(({ team, score, label, accent, num }) => (
           <div key={label} style={{
             background: "rgba(0,0,0,0.3)",
