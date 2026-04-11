@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TIER_ORDER } from "@/lib/tierOrder";
@@ -182,7 +183,7 @@ function AverageCostBadge({ players }: { players: Player[] }) {
   );
 }
 
-export default function RankingsPage() {
+function RankingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const view = (searchParams?.get("view") || "soloq") as "soloq" | "custom";
@@ -258,7 +259,6 @@ export default function RankingsPage() {
   return (
     <div style={{ padding: "0 48px 40px", width: "100%" }}>
       
-      {/* Header */}
       <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "white", margin: 0 }}>Classement</h1>
@@ -271,7 +271,6 @@ export default function RankingsPage() {
         {view === "soloq" ? <AverageRankBadge players={players} /> : <AverageCostBadge players={players} />}
       </div>
 
-      {/* Toggle */}
       <div style={{
         display: "flex", gap: "8px", marginBottom: "20px",
         background: "rgba(0,0,0,0.3)", padding: "4px",
@@ -303,7 +302,6 @@ export default function RankingsPage() {
         </button>
       </div>
 
-      {/* SoloQ View */}
       {view === "soloq" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {TIERS.map(tier => {
@@ -386,7 +384,6 @@ export default function RankingsPage() {
         </div>
       )}
 
-      {/* Custom Games View */}
       {view === "custom" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {COST_TIERS.map(tier => {
@@ -468,5 +465,13 @@ export default function RankingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function RankingsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "32px", color: "rgba(255,255,255,0.4)" }}>Chargement…</div>}>
+      <RankingsContent />
+    </Suspense>
   );
 }
