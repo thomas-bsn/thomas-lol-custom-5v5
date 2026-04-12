@@ -227,9 +227,15 @@ function TeamColumn({ label, players, accent, won, mmr, bordered }: {
             padding: "5px 8px", borderRadius: "6px",
             background: "rgba(255,255,255,0.03)",
           }}>
-            <span style={{ color: "rgba(255,255,255,0.75)", fontSize: "12px", fontWeight: 500 }}>
-              {p.prenom}
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <img
+                src={`/rank_icons/${(p.rankTier ?? "unranked").toLowerCase()}.svg`}
+                style={{ width: "16px", height: "16px", flexShrink: 0 }}
+              />
+              <span style={{ color: "rgba(255,255,255,0.75)", fontSize: "12px", fontWeight: 500 }}>
+                {p.prenom}
+              </span>
+            </div>
             <RankBadge tier={p.rankTier} division={p.rankDivision} />
           </div>
         ))}
