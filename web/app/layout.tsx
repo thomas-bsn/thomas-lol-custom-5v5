@@ -23,9 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body className={geist.variable} style={{ margin: 0, background: "#000", fontFamily: "var(--font-geist), sans-serif" }}>
-        <AuthValidator /> {/* ✅ AJOUT */}
+        <AuthValidator /> 
         <ClientBootReset />
-        <HelpTournamentButton />
         <CinemaButton />
 
         {/* Background vidéo */}

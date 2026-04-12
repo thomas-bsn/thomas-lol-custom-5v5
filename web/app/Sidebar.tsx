@@ -9,9 +9,11 @@ import GameResultModal from "@/components/sidebar/GameResultModal";
 import type { PendingGame } from "@/lib/types/game";
 
 const items = [
+  { href: "/", label: "Accueil", icon: "🏠" },
   { href: "/picker", label: "Picker", icon: "⚔️" },
   { href: "/rankings", label: "Classement", icon: "🏆" },
   { href: "/proxchat", label: "Proximity Chat", icon: "🎙️" },
+  { href: "/history", label: "Historique", icon: "📜" },
 ];
 
 export default function Sidebar() {
