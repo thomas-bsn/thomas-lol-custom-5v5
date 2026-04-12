@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/useAppState";
 import { createDraftSession, createRouletteSession, Player } from "@/lib/appState";
@@ -43,9 +43,44 @@ function PlayerRow({ player }: { player: Player }) {
   );
 }
 
+function ButtonLoadingDots({ color = "rgba(255,255,255,0.8)" }: { color?: string }) {
+  return (
+    <>
+      <style>{`
+        @keyframes teamsButtonDotsPulse {
+          0%, 80%, 100% {
+            opacity: 0.25;
+            transform: scale(0.85);
+          }
+          40% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+        {[0, 1, 2].map(i => (
+          <span
+            key={i}
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "999px",
+              background: color,
+              display: "inline-block",
+              animation: `teamsButtonDotsPulse 0.9s ease-in-out ${i * 0.15}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
 export default function TeamsPage() {
   const router = useRouter();
   const { state, update, hydrated } = useAppState();
+  const [launchingDirect, setLaunchingDirect] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -70,14 +105,20 @@ export default function TeamsPage() {
     router.push("/sides");
   }
 
-  function launchDirect() {
-    if (!state?.result) return;
-    launchGame(
-      state,
-      { blue: state.result.team1, red: state.result.team2 },
-      update,
-      router
-    );
+  async function launchDirect() {
+    if (!state?.result || launchingDirect) return;
+
+    try {
+      setLaunchingDirect(true);
+      await launchGame(
+        state,
+        { blue: state.result.team1, red: state.result.team2 },
+        update,
+        router
+      );
+    } finally {
+      setLaunchingDirect(false);
+    }
   }
 
   function backAndReset() {
@@ -140,11 +181,25 @@ export default function TeamsPage() {
       </div>
 
       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <button onClick={goToSides} style={{ padding: "11px 24px", borderRadius: "9px", border: "none", background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
+        <button onClick={goToSides} style={{
+          padding: "11px 24px", borderRadius: "9px", border: "none",
+          background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer",
+        }}>
           Choisir les sides →
         </button>
-        <button onClick={launchDirect} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", fontSize: "14px", cursor: "pointer" }}>
-          Lancer sans sides
+        <button
+          onClick={launchDirect}
+          disabled={launchingDirect}
+          style={{
+            padding: "11px 20px", borderRadius: "9px",
+            border: "1px solid rgba(255,255,255,0.3)", background: "transparent",
+            color: "white", fontWeight: 700, fontSize: "14px",
+            cursor: launchingDirect ? "default" : "pointer",
+            opacity: launchingDirect ? 0.7 : 1,
+            minWidth: "160px", display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          {launchingDirect ? <ButtonLoadingDots color="white" /> : "Lancer sans sides"}
         </button>
         <button onClick={backAndReset} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.06)", background: "transparent", color: "rgba(255,255,255,0.25)", fontSize: "14px", cursor: "pointer" }}>
           Retour

@@ -51,20 +51,18 @@ export type GameState = {
   status: "wip" | "running" | "ended";
   code?: string;
   teams?: GameTeams;
+  gameId?: number; 
 };
 
 export type AppState = {
   version: 2;
-
   players: Player[];
-
   mode?: Mode;
-
   session?: Session;
-
   result?: Teams;
-
   game?: GameState;
+  boFormat?: 1 | 3 | 5;
+  seriesId?: number;
 };
 
 const STORAGE_KEY = "team-picker-state";

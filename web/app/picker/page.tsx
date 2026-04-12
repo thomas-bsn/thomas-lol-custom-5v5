@@ -392,6 +392,24 @@ export default function SetupPage() {
             <h2 style={{ color: "white", fontWeight: 700, fontSize: "15px", margin: "0 0 18px" }}>
               Ajouter un joueur
             </h2>
+
+            {isCreating && (
+              <div style={{
+                marginBottom: "14px", padding: "10px 14px", borderRadius: "8px",
+                border: "1px solid rgba(124,92,255,0.25)", background: "rgba(124,92,255,0.07)",
+                color: "rgba(180,140,255,0.9)", fontSize: "12px",
+                display: "flex", alignItems: "center", gap: "8px",
+              }}>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                <div style={{
+                  width: "12px", height: "12px", borderRadius: "50%",
+                  border: "2px solid rgba(124,92,255,0.3)",
+                  borderTopColor: "rgba(180,140,255,0.9)",
+                  animation: "spin 0.7s linear infinite", flexShrink: 0,
+                }} />
+                Récupération du compte Riot en cours…
+              </div>
+            )}
             <input
               placeholder="Prénom"
               style={{

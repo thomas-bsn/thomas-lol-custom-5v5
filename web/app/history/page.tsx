@@ -36,6 +36,13 @@ type Game = {
   redTeam: TeamEntry[];
 };
 
+type Series = {
+  seriesId: number;
+  format: number;
+  playedAt: string;
+  games: Game[];
+};
+
 function RankBadge({ tier, division }: { tier?: string | null; division?: number | null }) {
   const t = (tier ?? "UNRANKED").toUpperCase();
   const colors = TIER_COLORS[t] ?? { bg: "rgba(255,255,255,0.05)", text: "rgba(255,255,255,0.25)", border: "rgba(255,255,255,0.1)" };
@@ -63,11 +70,22 @@ function teamMMR(players: TeamEntry[]) {
   return players.reduce((sum, p) => sum + (p.cost ?? 0), 0);
 }
 
+function seriesScore(games: Game[]): { blue: number; red: number } {
+  return games.reduce(
+    (acc, g) => {
+      if (g.winner === "blue") acc.blue++;
+      else acc.red++;
+      return acc;
+    },
+    { blue: 0, red: 0 }
+  );
+}
+
 export default function HistoryPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const [games, setGames] = useState<Game[]>([]);
+  const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,12 +94,13 @@ export default function HistoryPage() {
     setError(null);
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/history/${year}/${month}`)
       .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
-      .then((data) => setGames(data.games ?? data ?? []))
+      .then((data) => setSeries(data.games ?? []))
       .catch(() => setError("Impossible de charger l'historique."))
       .finally(() => setLoading(false));
   }, [year, month]);
 
   const years = [now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2];
+  const totalGames = series.reduce((sum, s) => sum + s.games.length, 0);
 
   return (
     <main style={{ padding: "0 24px 60px", width: "100%", maxWidth: "900px" }}>
@@ -93,7 +112,6 @@ export default function HistoryPage() {
         </p>
       </div>
 
-      {/* Selectors */}
       <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "28px" }}>
         <select value={month} onChange={(e) => setMonth(Number(e.target.value))} style={selectStyle}>
           {MONTHS.map((label, i) => (
@@ -107,27 +125,107 @@ export default function HistoryPage() {
         </select>
         {!loading && !error && (
           <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.25)", fontSize: "13px" }}>
-            {games.length} game{games.length !== 1 ? "s" : ""}
+            {series.length} série{series.length !== 1 ? "s" : ""} · {totalGames} game{totalGames !== 1 ? "s" : ""}
           </span>
         )}
       </div>
 
       {loading && <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "13px", padding: "40px 0", textAlign: "center" }}>Chargement…</div>}
       {error && <div style={{ padding: "12px 16px", borderRadius: "8px", border: "1px solid rgba(255,80,80,0.25)", background: "rgba(255,80,80,0.07)", color: "#FF5050", fontSize: "13px" }}>{error}</div>}
-      {!loading && !error && games.length === 0 && (
+      {!loading && !error && series.length === 0 && (
         <div style={{ padding: "60px 0", textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: "13px" }}>Aucune game ce mois-ci.</div>
       )}
 
-      {!loading && !error && games.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {games.map((game) => <GameCard key={game.id} game={game} />)}
+      {!loading && !error && series.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {series.map((s) => <SeriesCard key={s.seriesId} series={s} />)}
         </div>
       )}
     </main>
   );
 }
 
-function GameCard({ game }: { game: Game }) {
+function SeriesCard({ series }: { series: Series }) {
+  const [open, setOpen] = useState(false);
+  const score = seriesScore(series.games);
+  const date = new Date(series.playedAt);
+  const dateLabel = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  const isBO1 = series.format === 1;
+  const blueWins = score.blue > score.red;
+  const redWins = score.red > score.blue;
+
+  return (
+    <div style={{
+      background: "rgba(0,0,0,0.3)",
+      border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: "14px",
+      overflow: "hidden",
+    }}>
+      {/* Series header */}
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 18px", cursor: "pointer",
+          borderBottom: open ? "1px solid rgba(255,255,255,0.05)" : "none",
+          background: "rgba(255,255,255,0.02)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Format badge */}
+          <span style={{
+            fontSize: "11px", fontWeight: 800,
+            padding: "3px 10px", borderRadius: "6px",
+            background: "rgba(124,92,255,0.15)",
+            border: "1px solid rgba(124,92,255,0.3)",
+            color: "rgba(180,140,255,0.9)",
+            letterSpacing: "0.04em",
+          }}>
+            BO{series.format}
+          </span>
+          <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px" }}>{dateLabel}</span>
+          <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "11px" }}>
+            {series.games.length} game{series.games.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Score */}
+          {!isBO1 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{
+                fontSize: "14px", fontWeight: 800,
+                color: blueWins ? "#50B4FF" : "rgba(255,255,255,0.3)",
+              }}>{score.blue}</span>
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "12px" }}>—</span>
+              <span style={{
+                fontSize: "14px", fontWeight: 800,
+                color: redWins ? "#FF5050" : "rgba(255,255,255,0.3)",
+              }}>{score.red}</span>
+            </div>
+          )}
+          {isBO1 && series.games[0] && (
+            <WinnerBadge winner={series.games[0].winner} />
+          )}
+          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>
+            {open ? "▲" : "▼"}
+          </span>
+        </div>
+      </div>
+
+      {/* Games list */}
+      {open && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(255,255,255,0.03)" }}>
+          {series.games.map((game, i) => (
+            <GameCard key={game.id} game={game} index={i + 1} showIndex={!isBO1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GameCard({ game, index, showIndex }: { game: Game; index: number; showIndex: boolean }) {
   const date = new Date(game.playedAt);
   const dateLabel = date.toLocaleDateString("fr-FR", {
     weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
@@ -139,27 +237,32 @@ function GameCard({ game }: { game: Game }) {
   const diffColor = diff <= 5 ? "#50DC8C" : diff <= 15 ? "#FFB932" : "#FF5050";
 
   return (
-    <div style={{
-      background: "rgba(0,0,0,0.3)",
-      border: "1px solid rgba(255,255,255,0.07)",
-      borderRadius: "12px",
-      overflow: "hidden",
-    }}>
+    <div style={{ background: "rgba(0,0,0,0.2)" }}>
       {/* Top bar */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)",
+        padding: "8px 16px", borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>Game #{game.id}</span>
+          {showIndex && (
+            <span style={{
+              fontSize: "10px", fontWeight: 700,
+              color: "rgba(255,255,255,0.25)",
+              background: "rgba(255,255,255,0.05)",
+              padding: "1px 7px", borderRadius: "4px",
+            }}>
+              Game {index}
+            </span>
+          )}
+          <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>#{game.id}</span>
           <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
-          <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px" }}>{dateLabel}</span>
+          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px" }}>{dateLabel}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{
-            fontSize: "11px", color: diffColor,
+            fontSize: "10px", color: diffColor,
             background: `${diffColor}15`, border: `1px solid ${diffColor}40`,
-            borderRadius: "5px", padding: "2px 8px", fontWeight: 600,
+            borderRadius: "4px", padding: "1px 7px", fontWeight: 600,
           }}>
             Δ {diff} pts
           </span>
@@ -180,7 +283,7 @@ function WinnerBadge({ winner }: { winner: "blue" | "red" }) {
   const isBlue = winner === "blue";
   return (
     <span style={{
-      fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "5px",
+      fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px",
       background: isBlue ? "rgba(80,180,255,0.15)" : "rgba(255,80,80,0.12)",
       border: `1px solid ${isBlue ? "rgba(80,180,255,0.4)" : "rgba(255,80,80,0.4)"}`,
       color: isBlue ? "#50B4FF" : "#FF5050",
@@ -196,18 +299,17 @@ function TeamColumn({ label, players, accent, won, mmr, bordered }: {
 }) {
   return (
     <div style={{
-      padding: "12px 16px",
-      borderLeft: bordered ? "1px solid rgba(255,255,255,0.05)" : undefined,
+      padding: "10px 14px",
+      borderLeft: bordered ? "1px solid rgba(255,255,255,0.04)" : undefined,
       background: won ? `rgba(${accent}, 0.03)` : undefined,
     }}>
-      {/* Team header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
         <span style={{ fontSize: "11px", fontWeight: 700, color: `rgb(${accent})`, letterSpacing: "0.05em" }}>
           {label}
         </span>
         {won && (
           <span style={{
-            fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px",
+            fontSize: "9px", fontWeight: 700, padding: "1px 5px", borderRadius: "3px",
             background: `rgba(${accent}, 0.15)`, border: `1px solid rgba(${accent}, 0.3)`,
             color: `rgb(${accent})`,
           }}>
@@ -219,18 +321,17 @@ function TeamColumn({ label, players, accent, won, mmr, bordered }: {
         </span>
       </div>
 
-      {/* Players */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         {players.map((p) => (
           <div key={p.riotId} style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "5px 8px", borderRadius: "6px",
+            padding: "4px 7px", borderRadius: "5px",
             background: "rgba(255,255,255,0.03)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <img
                 src={`/rank_icons/${(p.rankTier ?? "unranked").toLowerCase()}.svg`}
-                style={{ width: "16px", height: "16px", flexShrink: 0 }}
+                style={{ width: "14px", height: "14px", flexShrink: 0 }}
               />
               <span style={{ color: "rgba(255,255,255,0.75)", fontSize: "12px", fontWeight: 500 }}>
                 {p.prenom}

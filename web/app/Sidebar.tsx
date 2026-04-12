@@ -3,14 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import PendingGamesSection from "@/components/sidebar/PendingGamesSection";
-import GameResultModal from "@/components/sidebar/GameResultModal";
-import type { PendingGame } from "@/lib/types/game";
 
 const items = [
   { href: "/", label: "Accueil", icon: "🏠" },
   { href: "/picker", label: "Picker", icon: "⚔️" },
+  { href: "/sessions", label: "Sessions", icon: "🎮" },
   { href: "/rankings", label: "Classement", icon: "🏆" },
   { href: "/proxchat", label: "Proximity Chat", icon: "🎙️" },
   { href: "/history", label: "Historique", icon: "📜" },
@@ -20,12 +17,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<{ username: string; avatar: string } | null>(null);
-  const [pendingGames, setPendingGames] = useState<PendingGame[]>([]);
-  const [pendingOpen, setPendingOpen] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<PendingGame | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     function syncAuth() {
@@ -39,19 +30,6 @@ export default function Sidebar() {
     return () => window.removeEventListener("auth-change", syncAuth);
   }, []);
 
-  useEffect(() => {
-    async function fetchPending() {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/pending-games`);
-        const data = await res.json();
-        setPendingGames(data.pendingGames ?? []);
-      } catch {}
-    }
-    fetchPending();
-    const interval = setInterval(fetchPending, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
   function logout() {
     localStorage.removeItem("jwt");
     localStorage.removeItem("discord_username");
@@ -59,15 +37,6 @@ export default function Sidebar() {
     setUser(null);
     window.dispatchEvent(new Event("auth-change"));
     router.push("/");
-  }
-
-  async function setWinner(gameId: number, winner: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/${gameId}/result`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ winner }),
-    });
-    setPendingGames(prev => prev.filter(g => g.id !== gameId));
   }
 
   return (
@@ -85,7 +54,7 @@ export default function Sidebar() {
           <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", marginTop: "2px" }}>LoL Tournament</div>
         </div>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+        <nav style={{ display: "flex", flexDirection: "column", gap: "4px"}}>
           {items.map((it) => {
             const active = pathname === it.href;
             return (
@@ -104,12 +73,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <PendingGamesSection
-          games={pendingGames}
-          open={pendingOpen}
-          onToggle={() => setPendingOpen(o => !o)}
-          onSelect={setSelectedGame}
-        />
+        <div style={{ flex: 1 }} />
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "12px" }}>
           {user ? (
@@ -150,14 +114,6 @@ export default function Sidebar() {
 
       </aside>
 
-      {mounted && selectedGame && createPortal(
-        <GameResultModal
-          game={selectedGame}
-          onClose={() => setSelectedGame(null)}
-          onWinner={setWinner}
-        />,
-        document.body
-      )}
     </>
   );
 }

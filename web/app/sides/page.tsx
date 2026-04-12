@@ -60,6 +60,40 @@ function Coin({ state, result }: { state: CoinState; result: Face | null }) {
   );
 }
 
+function ButtonLoadingDots({ color = "rgba(255,255,255,0.85)" }: { color?: string }) {
+  return (
+    <>
+      <style>{`
+        @keyframes sidesButtonDotsPulse {
+          0%, 80%, 100% {
+            opacity: 0.25;
+            transform: scale(0.85);
+          }
+          40% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+        {[0, 1, 2].map(i => (
+          <span
+            key={i}
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "999px",
+              background: color,
+              display: "inline-block",
+              animation: `sidesButtonDotsPulse 0.9s ease-in-out ${i * 0.15}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
 export default function SidesPage() {
   const router = useRouter();
   const { state, update, hydrated } = useAppState();
@@ -70,6 +104,7 @@ export default function SidesPage() {
   const [coinResult, setCoinResult] = useState<Face | null>(null);
   const [won, setWon] = useState<boolean | null>(null);
   const [chosenSide, setChosenSide] = useState<Side | null>(null);
+  const [launchingGame, setLaunchingGame] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -102,12 +137,26 @@ export default function SidesPage() {
     setChosenSide(null);
   }
 
-  function launch(side: Side) {
-    if (!state?.result) return;
-    const teams: GameTeams = side === "blue"
-      ? { blue: sideChooser === 1 ? state.result.team1 : state.result.team2, red: sideChooser === 1 ? state.result.team2 : state.result.team1 }
-      : { red: sideChooser === 1 ? state.result.team1 : state.result.team2, blue: sideChooser === 1 ? state.result.team2 : state.result.team1 };
-    launchGame(state, teams, update, router);
+  async function launch(side: Side) {
+    if (!state?.result || launchingGame) return;
+
+    const teams: GameTeams =
+      side === "blue"
+        ? {
+            blue: sideChooser === 1 ? state.result.team1 : state.result.team2,
+            red: sideChooser === 1 ? state.result.team2 : state.result.team1,
+          }
+        : {
+            red: sideChooser === 1 ? state.result.team1 : state.result.team2,
+            blue: sideChooser === 1 ? state.result.team2 : state.result.team1,
+          };
+
+    try {
+      setLaunchingGame(true);
+      await launchGame(state, teams, update, router);
+    } finally {
+      setLaunchingGame(false);
+    }
   }
 
   const tName = (n: 1 | 2) => n === 1 ? "Team Blue" : "Team Red";
@@ -248,17 +297,41 @@ export default function SidesPage() {
                       </p>
                     </div>
                     <div style={{ display: "flex", gap: "8px" }}>
-                      <button onClick={() => launch(chosenSide)} style={{
-                        padding: "11px 22px", borderRadius: "9px", border: "none",
-                        background: "white", color: "black", fontWeight: 700, fontSize: "14px", cursor: "pointer",
-                      }}>
-                        Lancer la game →
+                      <button
+                        onClick={() => launch(chosenSide)}
+                        disabled={launchingGame}
+                        style={{
+                          padding: "11px 22px",
+                          borderRadius: "9px",
+                          border: "none",
+                          background: "white",
+                          color: "black",
+                          fontWeight: 700,
+                          fontSize: "14px",
+                          cursor: launchingGame ? "default" : "pointer",
+                          opacity: launchingGame ? 0.8 : 1,
+                          minWidth: "150px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {launchingGame ? <ButtonLoadingDots color="rgba(0,0,0,0.75)" /> : "Lancer la game →"}
                       </button>
-                      <button onClick={reset} style={{
-                        padding: "11px 16px", borderRadius: "9px",
-                        border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)",
-                        color: "rgba(255,255,255,0.4)", fontSize: "13px", cursor: "pointer",
-                      }}>
+                      <button
+                        onClick={reset}
+                        disabled={launchingGame}
+                        style={{
+                          padding: "11px 16px",
+                          borderRadius: "9px",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "rgba(255,255,255,0.04)",
+                          color: "rgba(255,255,255,0.4)",
+                          fontSize: "13px",
+                          cursor: launchingGame ? "default" : "pointer",
+                          opacity: launchingGame ? 0.5 : 1,
+                        }}
+                      >
                         Rejouer
                       </button>
                     </div>

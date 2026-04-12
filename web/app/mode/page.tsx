@@ -60,6 +60,34 @@ export default function ModePage() {
         </p>
       </div>
 
+      {/* Sélecteur BO */}
+      <div style={{ marginBottom: "16px" }}>
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "10px" }}>
+          FORMAT
+        </div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          {([1, 3, 5] as const).map((format) => {
+            const active = (state.boFormat ?? 1) === format;
+            return (
+              <button
+                key={format}
+                onClick={() => update({ ...state, boFormat: format, seriesId: undefined })}
+                style={{
+                  padding: "8px 20px", borderRadius: "8px",
+                  border: active ? "1px solid rgba(124,92,255,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                  background: active ? "rgba(124,92,255,0.15)" : "rgba(255,255,255,0.04)",
+                  color: active ? "white" : "rgba(255,255,255,0.4)",
+                  fontSize: "13px", fontWeight: active ? 700 : 400,
+                  cursor: "pointer", transition: "all 0.15s",
+                }}
+              >
+                BO{format}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "16px", alignItems: "start" }}>
 
         {/* Colonne gauche — modes */}
@@ -95,7 +123,12 @@ export default function ModePage() {
             <button
               onClick={() => {
                 const session = createRouletteSession(players);
-                update({ ...state, mode: rouletteType === "balanced" ? "balanced" : "roulette", session });
+                update({
+                  ...state,
+                  boFormat: state.boFormat ?? 1,
+                  mode: rouletteType === "balanced" ? "balanced" : "roulette",
+                  session
+                });
                 router.push("/roulette");
               }}
               style={{ padding: "10px 20px", borderRadius: "8px", border: "none", background: "white", color: "black", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
@@ -108,7 +141,12 @@ export default function ModePage() {
           <button
             onClick={() => {
               const session = createDraftSession(players);
-              update({ ...state, mode: "draft", session });
+              update({
+                ...state,
+                boFormat: state.boFormat ?? 1,
+                mode: "draft",
+                session
+              });
               router.push("/draft");
             }}
             style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "14px", padding: "20px", textAlign: "left", cursor: "pointer", transition: "border-color 0.15s", width: "100%" }}
