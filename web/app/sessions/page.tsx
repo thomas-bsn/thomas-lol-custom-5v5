@@ -71,7 +71,7 @@ export default function SessionsPage() {
   async function fetchActive() {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/series/active`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/series/active`);
       const data = await res.json();
       setSeries(data.series ?? []);
     } catch {}
@@ -80,7 +80,7 @@ export default function SessionsPage() {
 
   async function handleWinner(gameId: number, winner: "blue" | "red", seriesId: number) {
     setSettingWinner(gameId);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/${gameId}/result`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/games/${gameId}/result`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ winner }),

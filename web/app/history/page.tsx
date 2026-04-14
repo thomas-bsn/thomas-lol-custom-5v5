@@ -92,7 +92,7 @@ export default function HistoryPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/history/${year}/${month}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/games/history/${year}/${month}`)
       .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
       .then((data) => setSeries(data.games ?? []))
       .catch(() => setError("Impossible de charger l'historique."))

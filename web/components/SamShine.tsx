@@ -104,9 +104,13 @@ export default function SamShine() {
             const cx = CENTER + r * Math.cos(a);
             const cy = CENTER + r * Math.sin(a);
             const s = 3.5;
-            return <polygon key={i}
+            return <polygon 
+              key={i}
+              suppressHydrationWarning
               points={`${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`}
-              fill="#FFD700" opacity={0.55} />;
+              fill="#FFD700" 
+              opacity={0.55} 
+            />;
           })}
         </g>
 

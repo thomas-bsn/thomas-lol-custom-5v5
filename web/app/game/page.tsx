@@ -107,7 +107,7 @@ export default function GamePage() {
 
   async function fetchSeriesStatus(seriesId: number) {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/series/${seriesId}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/series/${seriesId}`);
       if (res.ok) setSeriesStatus(await res.json());
     } catch {}
   }

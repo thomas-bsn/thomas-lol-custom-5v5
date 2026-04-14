@@ -17,7 +17,7 @@ export async function launchGame(
     stateBoFormat: state.boFormat,
   });
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/create`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/games`, {  // ✅ Viré /create
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -27,6 +27,12 @@ export async function launchGame(
       boFormat,
     }),
   });
+
+  if (!res.ok) {  // ✅ Ajoute error handling
+    const error = await res.text();
+    console.error("Failed to create game:", error);
+    throw new Error(`Failed to create game: ${res.status}`);
+  }
 
   const data = await res.json();
   const fakeCode = Math.random().toString(36).slice(2, 8).toUpperCase();

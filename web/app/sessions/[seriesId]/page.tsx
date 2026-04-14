@@ -123,7 +123,7 @@ export default function SessionDetailPage() {
     setLoading(true);
     try {
       const [seriesRes, playersRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/series/${seriesId}`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/series/${seriesId}`),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/players`),
       ]);
       const seriesData: SeriesStatus = await seriesRes.json();
@@ -143,7 +143,7 @@ export default function SessionDetailPage() {
   async function handleWinner(winner: "blue" | "red") {
     if (!series?.lastGame) return;
     setSettingWinner(true);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/${series.lastGame.id}/result`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/games/${series.lastGame.id}/result`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ winner }),
@@ -180,7 +180,7 @@ export default function SessionDetailPage() {
 
     const blueIds = blueTeam.map(p => allPlayers.find(ap => ap.riotId === p.riotId)?.id).filter(Boolean) as number[];
     const redIds  = redTeam.map(p => allPlayers.find(ap => ap.riotId === p.riotId)?.id).filter(Boolean) as number[];
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/create`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/games`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -585,7 +585,7 @@ export default function SessionDetailPage() {
                 onClick={async () => {
                   if (!series) return;
                   setAbandoning(true);
-                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/game/series/${series.seriesId}/abandon`, {
+                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/series/${series.seriesId}/abandon`, {
                     method: "PUT",
                   });
                   setShowAbandonConfirm(false);
