@@ -153,7 +153,7 @@ export default function RoulettePage() {
         {/* Team A */}
         <div style={{ background: "rgba(80,180,255,0.04)", border: "1px solid rgba(80,180,255,0.15)", borderRadius: "14px", overflow: "hidden" }}>
           <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(80,180,255,0.04)" }}>
-            <span style={{ color: "white", fontWeight: 700, fontSize: "14px" }}>Team Blue</span>
+            <span style={{ color: "white", fontWeight: 700, fontSize: "14px" }}>Team A</span>
             <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>{scoreA} MMR</span>
           </div>
           <div style={{ padding: "10px", minHeight: "180px", display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -167,7 +167,7 @@ export default function RoulettePage() {
         {/* Team B */}
         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,80,80,0.15)", borderRadius: "14px", overflow: "hidden" }}>
           <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,80,80,0.04)" }}>
-            <span style={{ color: "white", fontWeight: 700, fontSize: "14px" }}>Team Red</span>
+            <span style={{ color: "white", fontWeight: 700, fontSize: "14px" }}>Team B</span>
             <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>{scoreB} MMR</span>
           </div>
           <div style={{ padding: "10px", minHeight: "180px", display: "flex", flexDirection: "column", gap: "4px" }}>

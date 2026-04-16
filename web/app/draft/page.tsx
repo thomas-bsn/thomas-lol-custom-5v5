@@ -243,12 +243,12 @@ export default function DraftPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", maxWidth: "900px" }}>
             <CaptainPicker
-              label="TEAM BLUE" value={captain1} accent="80,180,255"
+              label="TEAM A" value={captain1} accent="80,180,255"
               players={players.filter(p => p.prenom !== captain2?.prenom)}
               onChange={p => setCaptain(1, p)}
             />
             <CaptainPicker
-              label="TEAM RED" value={captain2} accent="255,80,80"
+              label="TEAM B" value={captain2} accent="255,80,80"
               players={players.filter(p => p.prenom !== captain1?.prenom)}
               onChange={p => setCaptain(2, p)}
             />
@@ -321,8 +321,8 @@ export default function DraftPage() {
 
             {/* Teams */}
             {([
-              { team: team1 as Player[], score: scoreA, turn: 1 as const, label: "TEAM BLUE", accent: "80,180,255" },
-              { team: team2 as Player[], score: scoreB, turn: 2 as const, label: "TEAM RED", accent: "255,80,80" },
+              { team: team1 as Player[], score: scoreA, turn: 1 as const, label: "TEAM A", accent: "80,180,255" },
+              { team: team2 as Player[], score: scoreB, turn: 2 as const, label: "TEAM B", accent: "255,80,80" },
             ]).map(({ team, score, turn, label, accent }) => (
               <div key={label} style={{
                 background: currentTurn === turn ? `rgba(${accent}, 0.05)` : "rgba(0,0,0,0.3)",

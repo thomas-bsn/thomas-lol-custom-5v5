@@ -43,6 +43,13 @@ export default function ModePage() {
     }
   }, [hydrated, state, router]);
 
+  // Initialiser boFormat à 3 (BO3) si non défini
+  useEffect(() => {
+    if (state && state.boFormat === undefined) {
+      update({ ...state, boFormat: 3 });
+    }
+  }, [state?.boFormat]);
+
   if (!hydrated) return <main style={{ padding: "24px", color: "white" }}>Chargement…</main>;
   if (!state) return <main style={{ padding: "24px", color: "white" }}>Redirection…</main>;
 
@@ -67,7 +74,7 @@ export default function ModePage() {
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           {([1, 3, 5] as const).map((format) => {
-            const active = (state.boFormat ?? 1) === format;
+            const active = (state.boFormat ?? 3) === format;
             return (
               <button
                 key={format}
@@ -125,7 +132,7 @@ export default function ModePage() {
                 const session = createRouletteSession(players);
                 update({
                   ...state,
-                  boFormat: state.boFormat ?? 1,
+                  boFormat: state.boFormat ?? 3,
                   mode: rouletteType === "balanced" ? "balanced" : "roulette",
                   session
                 });
@@ -143,7 +150,7 @@ export default function ModePage() {
               const session = createDraftSession(players);
               update({
                 ...state,
-                boFormat: state.boFormat ?? 1,
+                boFormat: state.boFormat ?? 3,
                 mode: "draft",
                 session
               });

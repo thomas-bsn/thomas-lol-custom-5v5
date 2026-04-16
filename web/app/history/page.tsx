@@ -40,6 +40,7 @@ type Series = {
   seriesId: number;
   format: number;
   playedAt: string;
+  teamAReference?: string[]; // ✨ NOUVEAU
   games: Game[];
 };
 
@@ -70,14 +71,26 @@ function teamMMR(players: TeamEntry[]) {
   return players.reduce((sum, p) => sum + (p.cost ?? 0), 0);
 }
 
-function seriesScore(games: Game[]): { blue: number; red: number } {
-  return games.reduce(
+function seriesScore(series: Series): { teamA: number; teamB: number } {
+  const teamAReference = series.teamAReference ?? [];
+  
+  return series.games.reduce(
     (acc, g) => {
-      if (g.winner === "blue") acc.blue++;
-      else acc.red++;
+      // Déterminer si Team A est sur blue side pour cette game
+      const isTeamAOnBlue = teamAReference.some(riotId => 
+        g.blueTeam.some(p => p.riotId === riotId)
+      );
+      
+      // Team A a gagné ?
+      const teamAWon = (g.winner === "blue" && isTeamAOnBlue) || 
+                       (g.winner === "red" && !isTeamAOnBlue);
+      
+      if (teamAWon) acc.teamA++;
+      else acc.teamB++;
+      
       return acc;
     },
-    { blue: 0, red: 0 }
+    { teamA: 0, teamB: 0 }
   );
 }
 
@@ -147,12 +160,12 @@ export default function HistoryPage() {
 
 function SeriesCard({ series }: { series: Series }) {
   const [open, setOpen] = useState(false);
-  const score = seriesScore(series.games);
+  const score = seriesScore(series);
   const date = new Date(series.playedAt);
   const dateLabel = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
   const isBO1 = series.format === 1;
-  const blueWins = score.blue > score.red;
-  const redWins = score.red > score.blue;
+  const teamAWins = score.teamA > score.teamB;
+  const teamBWins = score.teamB > score.teamA;
 
   return (
     <div style={{
@@ -195,13 +208,13 @@ function SeriesCard({ series }: { series: Series }) {
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{
                 fontSize: "14px", fontWeight: 800,
-                color: blueWins ? "#50B4FF" : "rgba(255,255,255,0.3)",
-              }}>{score.blue}</span>
+                color: teamAWins ? "#50B4FF" : "rgba(255,255,255,0.3)",
+              }}>{score.teamA}</span>
               <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "12px" }}>—</span>
               <span style={{
                 fontSize: "14px", fontWeight: 800,
-                color: redWins ? "#FF5050" : "rgba(255,255,255,0.3)",
-              }}>{score.red}</span>
+                color: teamBWins ? "#FF5050" : "rgba(255,255,255,0.3)",
+              }}>{score.teamB}</span>
             </div>
           )}
           {isBO1 && series.games[0] && (
@@ -217,7 +230,7 @@ function SeriesCard({ series }: { series: Series }) {
       {open && (
         <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(255,255,255,0.03)" }}>
           {series.games.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i + 1} showIndex={!isBO1} />
+            <GameCard key={game.id} game={game} index={i + 1} showIndex={!isBO1} teamAReference={series.teamAReference} />
           ))}
         </div>
       )}
@@ -225,7 +238,7 @@ function SeriesCard({ series }: { series: Series }) {
   );
 }
 
-function GameCard({ game, index, showIndex }: { game: Game; index: number; showIndex: boolean }) {
+function GameCard({ game, index, showIndex, teamAReference }: { game: Game; index: number; showIndex: boolean; teamAReference?: string[] }) {
   const date = new Date(game.playedAt);
   const dateLabel = date.toLocaleDateString("fr-FR", {
     weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
@@ -236,6 +249,14 @@ function GameCard({ game, index, showIndex }: { game: Game; index: number; showI
   const diff    = Math.abs(blueMMR - redMMR);
   const diffColor = diff <= 5 ? "#50DC8C" : diff <= 15 ? "#FFB932" : "#FF5050";
 
+  // Déterminer quelle équipe (A ou B) est sur quel side pour cette game
+  const isTeamAOnBlue = teamAReference && teamAReference.length > 0
+    ? teamAReference.some(riotId => game.blueTeam.some(p => p.riotId === riotId))
+    : true; // Fallback: si pas de référence, on suppose Team A = blue
+
+  const blueLabel = isTeamAOnBlue ? "Team A" : "Team B";
+  const redLabel = isTeamAOnBlue ? "Team B" : "Team A";
+  
   return (
     <div style={{ background: "rgba(0,0,0,0.2)" }}>
       {/* Top bar */}
@@ -266,21 +287,35 @@ function GameCard({ game, index, showIndex }: { game: Game; index: number; showI
           }}>
             Δ {diff} pts
           </span>
-          <WinnerBadge winner={game.winner} />
+          <WinnerBadge winner={game.winner} isTeamAOnBlue={isTeamAOnBlue} />
         </div>
       </div>
 
       {/* Teams */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-        <TeamColumn label="Blue" players={game.blueTeam} accent="80,180,255" won={game.winner === "blue"} mmr={blueMMR} />
-        <TeamColumn label="Red"  players={game.redTeam}  accent="255,80,80"  won={game.winner === "red"}  mmr={redMMR} bordered />
+        <TeamColumn label={blueLabel} side="Blue side" players={game.blueTeam} accent="80,180,255" won={game.winner === "blue"} mmr={blueMMR} />
+        <TeamColumn label={redLabel} side="Red side" players={game.redTeam}  accent="255,80,80"  won={game.winner === "red"}  mmr={redMMR} bordered />
       </div>
     </div>
   );
 }
 
-function WinnerBadge({ winner }: { winner: "blue" | "red" }) {
-  const isBlue = winner === "blue";
+function WinnerBadge({ winner, isTeamAOnBlue }: { winner: "blue" | "red"; isTeamAOnBlue?: boolean }) {
+  // Déterminer quelle équipe a gagné (A ou B)
+  let teamLabel: string;
+  let isBlue: boolean;
+  
+  if (isTeamAOnBlue !== undefined) {
+    // On connaît la référence Team A
+    const teamAWon = (winner === "blue" && isTeamAOnBlue) || (winner === "red" && !isTeamAOnBlue);
+    teamLabel = teamAWon ? "A" : "B";
+    isBlue = winner === "blue";
+  } else {
+    // Fallback: blue = Team A, red = Team B
+    teamLabel = winner === "blue" ? "A" : "B";
+    isBlue = winner === "blue";
+  }
+  
   return (
     <span style={{
       fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px",
@@ -288,13 +323,13 @@ function WinnerBadge({ winner }: { winner: "blue" | "red" }) {
       border: `1px solid ${isBlue ? "rgba(80,180,255,0.4)" : "rgba(255,80,80,0.4)"}`,
       color: isBlue ? "#50B4FF" : "#FF5050",
     }}>
-      {isBlue ? "Blue" : "Red"} a gagné
+      Team {teamLabel} a gagné
     </span>
   );
 }
 
-function TeamColumn({ label, players, accent, won, mmr, bordered }: {
-  label: string; players: TeamEntry[]; accent: string;
+function TeamColumn({ label, side, players, accent, won, mmr, bordered }: {
+  label: string; side: string; players: TeamEntry[]; accent: string;
   won: boolean; mmr: number; bordered?: boolean;
 }) {
   return (
@@ -303,21 +338,26 @@ function TeamColumn({ label, players, accent, won, mmr, bordered }: {
       borderLeft: bordered ? "1px solid rgba(255,255,255,0.04)" : undefined,
       background: won ? `rgba(${accent}, 0.03)` : undefined,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 700, color: `rgb(${accent})`, letterSpacing: "0.05em" }}>
-          {label}
-        </span>
-        {won && (
-          <span style={{
-            fontSize: "9px", fontWeight: 700, padding: "1px 5px", borderRadius: "3px",
-            background: `rgba(${accent}, 0.15)`, border: `1px solid rgba(${accent}, 0.3)`,
-            color: `rgb(${accent})`,
-          }}>
-            WINNER
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginBottom: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "white", letterSpacing: "0.05em" }}>
+            {label}
           </span>
-        )}
-        <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.2)", fontSize: "11px" }}>
-          {mmr} pts
+          {won && (
+            <span style={{
+              fontSize: "9px", fontWeight: 700, padding: "1px 5px", borderRadius: "3px",
+              background: `rgba(${accent}, 0.15)`, border: `1px solid rgba(${accent}, 0.3)`,
+              color: `rgb(${accent})`,
+            }}>
+              WINNER
+            </span>
+          )}
+          <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.2)", fontSize: "11px" }}>
+            {mmr} pts
+          </span>
+        </div>
+        <span style={{ fontSize: "10px", fontWeight: 600, color: `rgb(${accent})` }}>
+          {side}
         </span>
       </div>
 

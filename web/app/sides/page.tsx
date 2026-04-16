@@ -159,7 +159,7 @@ export default function SidesPage() {
     }
   }
 
-  const tName = (n: 1 | 2) => n === 1 ? "Team Blue" : "Team Red";
+  const tName = (n: 1 | 2) => n === 1 ? "Team A" : "Team B";
   const loser = callerTeam === 1 ? 2 : 1;
   const sideChooser = won ? callerTeam! : loser as 1 | 2;
 

@@ -16,6 +16,8 @@ type SeriesStatus = {
   format: number;
   blueWins: number;
   redWins: number;
+  teamAWins: number;
+  teamBWins: number;
   lastGame: {
     id: number;
     winner: string | null;
@@ -95,7 +97,7 @@ export default function SessionsPage() {
   }
 
   const boOver = (s: SeriesStatus) =>
-    s.blueWins > s.format / 2 || s.redWins > s.format / 2;
+    s.teamAWins > s.format / 2 || s.teamBWins > s.format / 2;
 
   return (
     <main style={{ padding: "0 24px 60px", width: "100%", maxWidth: "860px" }}>
@@ -184,12 +186,12 @@ export default function SessionsPage() {
 
                     {/* Score */}
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ fontSize: "20px", fontWeight: 900, color: s.blueWins > s.redWins ? "#50B4FF" : "rgba(255,255,255,0.25)" }}>
-                        {s.blueWins}
+                    <span style={{ fontSize: "20px", fontWeight: 900, color: s.teamAWins > s.teamBWins ? "#50B4FF" : "rgba(255,255,255,0.25)" }}>
+                        {s.teamAWins}
                     </span>
                     <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "14px" }}>—</span>
-                    <span style={{ fontSize: "20px", fontWeight: 900, color: s.redWins > s.blueWins ? "#FF5050" : "rgba(255,255,255,0.25)" }}>
-                        {s.redWins}
+                    <span style={{ fontSize: "20px", fontWeight: 900, color: s.teamBWins > s.teamAWins ? "#FF5050" : "rgba(255,255,255,0.25)" }}>
+                        {s.teamBWins}
                     </span>
                     <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "12px", marginLeft: "4px" }}>→</span>
                     </div>
@@ -201,10 +203,11 @@ export default function SessionsPage() {
                     {(["blue", "red"] as const).map((team) => {
                         const players = team === "blue" ? s.lastGame!.blueTeam : s.lastGame!.redTeam;
                         const accent = team === "blue" ? "80,180,255" : "255,80,80";
+                        const label = team === "blue" ? "TEAM A" : "TEAM B";
                         return (
                         <div key={team}>
                             <div style={{ color: `rgb(${accent})`, fontSize: "10px", fontWeight: 700, marginBottom: "6px", letterSpacing: "0.05em" }}>
-                            {team === "blue" ? "BLUE" : "RED"}
+                            {label}
                             </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                             {players.map(p => (

@@ -15,6 +15,9 @@ type SeriesStatus = {
   format: number;
   blueWins: number;
   redWins: number;
+  teamAWins: number;      // ✨ NOUVEAU
+  teamBWins: number;      // ✨ NOUVEAU
+  teamAReference: string[]; // ✨ NOUVEAU
   lastGame: {
     id: number;
     winner: string | null;
@@ -107,6 +110,7 @@ export default function SessionDetailPage() {
   const [allPlayers, setAllPlayers] = useState<DBPlayer[]>([]);
   const [blueTeam, setBlueTeam] = useState<TeamEntry[]>([]);
   const [redTeam, setRedTeam] = useState<TeamEntry[]>([]);
+  const [initialBlueTeam, setInitialBlueTeam] = useState<TeamEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [settingWinner, setSettingWinner] = useState(false);
   const [launching, setLaunching] = useState(false);
@@ -114,6 +118,7 @@ export default function SessionDetailPage() {
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
   const [abandoning, setAbandoning] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ team: "blue" | "red"; riotId: string; top: number; left: number; width: number } | null>(null);
+  const [lastWinnerTeam, setLastWinnerTeam] = useState<"A" | "B" | null>(null);
 
   useEffect(() => {
     if (seriesId) init();
@@ -135,6 +140,7 @@ export default function SessionDetailPage() {
       if (seriesData.lastGame) {
         setBlueTeam(seriesData.lastGame.blueTeam);
         setRedTeam(seriesData.lastGame.redTeam);
+        setInitialBlueTeam(seriesData.lastGame.blueTeam);
       }
     } catch {}
     setLoading(false);
@@ -142,12 +148,23 @@ export default function SessionDetailPage() {
 
   async function handleWinner(winner: "blue" | "red") {
     if (!series?.lastGame) return;
+    
+    // Le backend va automatiquement incrémenter teamAWins ou teamBWins
     setSettingWinner(true);
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/games/${series.lastGame.id}/result`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ winner }),
     });
+    
+    // Stocker quelle équipe a gagné côté client pour le badge WINNER
+    const teamAReference = series.teamAReference ?? [];
+    const currentIsTeamAOnBlue = teamAReference.length > 0
+      ? teamAReference.some(riotId => blueTeam.some(p => p.riotId === riotId))
+      : true;
+    const winnerTeam = (winner === "blue" && currentIsTeamAOnBlue) || (winner === "red" && !currentIsTeamAOnBlue) ? "A" : "B";
+    setLastWinnerTeam(winnerTeam);
+    
     await init();
     setSettingWinner(false);
     setSidesSwapped(false);
@@ -194,6 +211,9 @@ export default function SessionDetailPage() {
     const data = await res.json();
     setLaunching(false);
 
+    // Reset le winner de la game précédente
+    setLastWinnerTeam(null);
+    
     // Rafraîchit la page pour afficher la nouvelle game
     await init();
     setSidesSwapped(false);
@@ -205,6 +225,13 @@ export default function SessionDetailPage() {
 
   const usedRiotIds = [...blueTeam, ...redTeam].map(p => p.riotId);
   const availablePlayers = allPlayers.filter(p => !usedRiotIds.includes(p.riotId));
+
+  // Déterminer quelle équipe originale (A ou B) est sur quel side
+  // On utilise teamAReference du backend (RiotIds de Team A pour tout le BO)
+  const teamAReference = series?.teamAReference ?? [];
+  const isTeamAOnBlue = teamAReference.length > 0
+    ? teamAReference.some(riotId => blueTeam.some(p => p.riotId === riotId))
+    : true;
 
   if (loading) return (
     <main style={{ padding: "0 24px", width: "100%", maxWidth: "860px", height: "60vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "20px" }}>
@@ -244,7 +271,7 @@ export default function SessionDetailPage() {
   if (!series) return <main style={{ padding: "24px", color: "rgba(255,255,255,0.4)" }}>Série introuvable.</main>;
 
   const isPending = !series.lastGame?.winner;
-  const boOver = series.blueWins > series.format / 2 || series.redWins > series.format / 2;
+  const boOver = series.teamAWins > series.format / 2 || series.teamBWins > series.format / 2;
   const gameNumber = series.blueWins + series.redWins + (isPending ? 1 : 0);
   const lastWinner = series.lastGame?.winner;
   const hasChanges = JSON.stringify(blueTeam.map(p => p.riotId)) !== JSON.stringify(series.lastGame?.blueTeam.map(p => p.riotId))
@@ -282,17 +309,19 @@ export default function SessionDetailPage() {
           background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.07)",
           borderRadius: "14px", padding: "14px 24px",
         }}>
+          {/* Team A - couleur selon son side actuel */}
           <div style={{ textAlign: "center" }}>
-            <div style={{ color: "rgba(80,180,255,0.6)", fontSize: "10px", fontWeight: 700, marginBottom: "4px" }}>BLUE</div>
-            <div style={{ fontSize: "28px", fontWeight: 900, color: series.blueWins > series.redWins ? "#50B4FF" : "rgba(255,255,255,0.25)" }}>
-              {series.blueWins}
+            <div style={{ color: isTeamAOnBlue ? "rgba(80,180,255,0.6)" : "rgba(255,80,80,0.6)", fontSize: "10px", fontWeight: 700, marginBottom: "4px" }}>A</div>
+            <div style={{ fontSize: "28px", fontWeight: 900, color: series.teamAWins > series.teamBWins ? (isTeamAOnBlue ? "#50B4FF" : "#FF5050") : "rgba(255,255,255,0.25)" }}>
+              {series.teamAWins}
             </div>
           </div>
           <div style={{ color: "rgba(255,255,255,0.15)", fontSize: "18px" }}>—</div>
+          {/* Team B - couleur selon son side actuel */}
           <div style={{ textAlign: "center" }}>
-            <div style={{ color: "rgba(255,80,80,0.6)", fontSize: "10px", fontWeight: 700, marginBottom: "4px" }}>RED</div>
-            <div style={{ fontSize: "28px", fontWeight: 900, color: series.redWins > series.blueWins ? "#FF5050" : "rgba(255,255,255,0.25)" }}>
-              {series.redWins}
+            <div style={{ color: isTeamAOnBlue ? "rgba(255,80,80,0.6)" : "rgba(80,180,255,0.6)", fontSize: "10px", fontWeight: 700, marginBottom: "4px" }}>B</div>
+            <div style={{ fontSize: "28px", fontWeight: 900, color: series.teamBWins > series.teamAWins ? (isTeamAOnBlue ? "#FF5050" : "#50B4FF") : "rgba(255,255,255,0.25)" }}>
+              {series.teamBWins}
             </div>
           </div>
         </div>
@@ -307,7 +336,7 @@ export default function SessionDetailPage() {
         }}>
           <span style={{ fontSize: "22px" }}>🏆</span>
           <div style={{ color: "#50DC8C", fontWeight: 700, fontSize: "15px" }}>
-            {series.blueWins > series.redWins ? "Blue" : "Red"} remporte le BO{series.format} ({series.blueWins}-{series.redWins})
+            Team {series.teamAWins > series.teamBWins ? "A" : "B"} remporte le BO{series.format} ({series.teamAWins}-{series.teamBWins})
           </div>
         </div>
       )}
@@ -317,7 +346,15 @@ export default function SessionDetailPage() {
         {(["blue", "red"] as const).map(team => {
           const players = team === "blue" ? blueTeam : redTeam;
           const accent = team === "blue" ? "80,180,255" : "255,80,80";
-          const won = lastWinner === team;
+          
+          // Déterminer le label en fonction de quelle équipe originale est sur ce side
+          const isTeamA = (team === "blue" && isTeamAOnBlue) || (team === "red" && !isTeamAOnBlue);
+          const label = isTeamA ? "Team A" : "Team B";
+          const side = team === "blue" ? "Blue side" : "Red side";
+          
+          // Le winner badge suit l'équipe qui a gagné, pas le side
+          const won = lastWinnerTeam ? (lastWinnerTeam === "A" && isTeamA) || (lastWinnerTeam === "B" && !isTeamA) : false;
+          
           return (
             <div key={team} style={{
               background: won ? `rgba(${accent},0.05)` : "rgba(0,0,0,0.3)",
@@ -327,18 +364,25 @@ export default function SessionDetailPage() {
               <div style={{
                 padding: "10px 14px", borderBottom: `1px solid rgba(${accent},0.1)`,
                 background: `rgba(${accent},0.08)`,
-                display: "flex", alignItems: "center", gap: "8px",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
-                <span style={{ color: `rgb(${accent})`, fontWeight: 700, fontSize: "13px" }}>
-                  {team === "blue" ? "Blue" : "Red"}
-                </span>
-                {won && (
-                  <span style={{
-                    fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px",
-                    background: `rgba(${accent},0.2)`, border: `1px solid rgba(${accent},0.4)`,
-                    color: `rgb(${accent})`,
-                  }}>WINNER</span>
-                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ color: "white", fontWeight: 700, fontSize: "13px" }}>
+                      {label}
+                    </span>
+                    {won && (
+                      <span style={{
+                        fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px",
+                        background: `rgba(${accent},0.2)`, border: `1px solid rgba(${accent},0.4)`,
+                        color: `rgb(${accent})`,
+                      }}>WINNER</span>
+                    )}
+                  </div>
+                  <span style={{ color: `rgb(${accent})`, fontSize: "10px", fontWeight: 600 }}>
+                    {side}
+                  </span>
+                </div>
               </div>
               <div style={{ padding: "8px", display: "flex", flexDirection: "column", gap: "4px", overflow: "visible" }}>
                 {players.map(p => (
@@ -435,6 +479,7 @@ export default function SessionDetailPage() {
               setSeries(s => s ? { ...s } : s);
               setBlueTeam(series.lastGame?.blueTeam ?? []);
               setRedTeam(series.lastGame?.redTeam ?? []);
+              setInitialBlueTeam(series.lastGame?.blueTeam ?? []);
               setSidesSwapped(false);
             }} style={{
               padding: "9px 16px", borderRadius: "8px",
@@ -473,7 +518,7 @@ export default function SessionDetailPage() {
                     opacity: settingWinner ? 0.7 : 1,
                 }}
                 >
-                {settingWinner ? <ButtonLoadingDots color="#50B4FF" /> : "Blue a gagné"}
+                {settingWinner ? <ButtonLoadingDots color="#50B4FF" /> : `Team ${isTeamAOnBlue ? "A" : "B"} a gagné`}
                 </button>
 
                 <button
@@ -492,7 +537,7 @@ export default function SessionDetailPage() {
                     opacity: settingWinner ? 0.7 : 1,
                 }}
                 >
-                {settingWinner ? <ButtonLoadingDots color="#FF5050" /> : "Red a gagné"}
+                {settingWinner ? <ButtonLoadingDots color="#FF5050" /> : `Team ${isTeamAOnBlue ? "B" : "A"} a gagné`}
                 </button>
           </div>
         </div>

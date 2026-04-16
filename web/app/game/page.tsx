@@ -123,6 +123,18 @@ export default function GamePage() {
   const blueTeam = state.game.teams?.blue ?? state.result?.team1 ?? [];
   const redTeam = state.game.teams?.red ?? state.result?.team2 ?? [];
 
+  // Déterminer quelle équipe originale (A ou B) est sur quel side
+  const isTeamAOnBlue = state.result?.team1.every(p1 => 
+    blueTeam.some(p2 => p1.prenom === p2.prenom && p1.riotId === p2.riotId)
+  ) ?? true;
+
+  const teamAPlayers = isTeamAOnBlue ? blueTeam : redTeam;
+  const teamBPlayers = isTeamAOnBlue ? redTeam : blueTeam;
+  const teamASide = isTeamAOnBlue ? "Blue side" : "Red side";
+  const teamBSide = isTeamAOnBlue ? "Red side" : "Blue side";
+  const teamAAccent = isTeamAOnBlue ? "80,180,255" : "255,80,80";
+  const teamBAccent = isTeamAOnBlue ? "255,80,80" : "80,180,255";
+
   const isBo = state.seriesId && seriesStatus;
   const gameNumber = isBo ? seriesStatus!.blueWins + seriesStatus!.redWins + 1 : null;
 
@@ -188,9 +200,9 @@ export default function GamePage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "24px" }}>
         {[
-          { team: blueTeam, label: "Blue side", accent: "80,180,255" },
-          { team: redTeam, label: "Red side", accent: "255,80,80" },
-        ].map(({ team, label, accent }) => (
+          { team: teamAPlayers, label: "Team A", side: teamASide, accent: teamAAccent },
+          { team: teamBPlayers, label: "Team B", side: teamBSide, accent: teamBAccent },
+        ].map(({ team, label, side, accent }) => (
           <div
             key={label}
             style={{
@@ -210,9 +222,14 @@ export default function GamePage() {
                 alignItems: "center",
               }}
             >
-              <span style={{ color: `rgb(${accent})`, fontWeight: 700, fontSize: "13px" }}>
-                {label}
-              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <span style={{ color: "white", fontWeight: 700, fontSize: "13px" }}>
+                  {label}
+                </span>
+                <span style={{ color: `rgb(${accent})`, fontSize: "11px", fontWeight: 600 }}>
+                  {side}
+                </span>
+              </div>
               <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>
                 {team.reduce((s, p) => s + p.mmr, 0)} MMR
               </span>

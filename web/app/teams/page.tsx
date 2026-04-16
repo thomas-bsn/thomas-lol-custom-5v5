@@ -142,9 +142,9 @@ export default function TeamsPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
         {([
-          { team: team1 as Player[], score: score1, label: "Team Blue", accent: "80,180,255", num: 1 },
-          { team: team2 as Player[], score: score2, label: "Team  Red", accent: "255,80,80", num: 2 },
-        ]).map(({ team, score, label, accent, num }) => (
+          { team: team1 as Player[], score: score1, label: "Team A", side: "Blue side", accent: "80,180,255", num: 1 },
+          { team: team2 as Player[], score: score2, label: "Team B", side: "Red side", accent: "255,80,80", num: 2 },
+        ]).map(({ team, score, label, side, accent, num }) => (
           <div key={label} style={{
             background: "rgba(0,0,0,0.3)",
             border: stronger === num ? `1px solid rgba(${accent}, 0.4)` : "1px solid rgba(255,255,255,0.07)",
@@ -155,7 +155,10 @@ export default function TeamsPage() {
               display: "flex", justifyContent: "space-between", alignItems: "center",
               background: stronger === num ? `rgba(${accent}, 0.05)` : "transparent",
             }}>
-              <span style={{ color: "white", fontWeight: 700, fontSize: "15px" }}>{label}</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <span style={{ color: "white", fontWeight: 700, fontSize: "15px" }}>{label}</span>
+                <span style={{ color: `rgb(${accent})`, fontSize: "11px", fontWeight: 600 }}>{side}</span>
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 {stronger === num && (
                   <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px", background: `rgba(${accent}, 0.8)`, color: "white" }}>FAVORI</span>
@@ -199,7 +202,7 @@ export default function TeamsPage() {
             minWidth: "160px", display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
-          {launchingDirect ? <ButtonLoadingDots color="white" /> : "Lancer sans sides"}
+          {launchingDirect ? <ButtonLoadingDots color="white" /> : "Lancer sans choisir les sides"}
         </button>
         <button onClick={backAndReset} style={{ padding: "11px 20px", borderRadius: "9px", border: "1px solid rgba(255,255,255,0.06)", background: "transparent", color: "rgba(255,255,255,0.25)", fontSize: "14px", cursor: "pointer" }}>
           Retour
