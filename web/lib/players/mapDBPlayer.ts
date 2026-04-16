@@ -35,7 +35,10 @@ export function mapDBPlayer(p: DBPlayer): Player {
   return {
     id: p.id,
     prenom: p.prenom,
+    riotId: p.riotId,
     rank: tier + (division ? ` ${division}` : ""),
-    mmr
+    mmr,
+    rankTier: p.rankTier ?? null,
+    rankDivision: p.rankDivision ?? null,
   }
 }

@@ -3,8 +3,11 @@ export type Mode = "roulette" | "draft" | "balanced";
 export type Player = {
   id: number;
   prenom: string;
+  riotId: string;
   rank: string;
   mmr: number;
+  rankTier?: string | null;
+  rankDivision?: number | null;
 };
 
 export type Teams = {
